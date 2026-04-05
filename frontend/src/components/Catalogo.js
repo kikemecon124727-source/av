@@ -288,30 +288,30 @@ const Catalogo = () => {
                   className="group cursor-pointer animate-fadeIn"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  {/* Product Card - Diseño elegante con dimensiones fijas */}
-                  <div className="bg-white dark:bg-[#1a1520] rounded-none overflow-hidden shadow-sm hover:shadow-2xl dark:shadow-black/30 transition-all duration-500 border border-gray-100 dark:border-[#2d1f3f]">
-                    {/* Product Image - Aspect ratio fijo 3:4 */}
-                    <div className="relative w-full aspect-[3/4] overflow-hidden bg-gray-50 dark:bg-[#0a0a0a]">
+                  {/* Product Card - Diseño original elegante */}
+                  <div className="bg-white dark:bg-[#1a1520] rounded-xl overflow-hidden shadow-sm hover:shadow-2xl dark:shadow-black/30 transition-all duration-500 border border-gray-100 dark:border-[#2d1f3f]">
+                    {/* Product Image */}
+                    <div className="relative w-full h-48 sm:h-56 lg:h-64 overflow-hidden bg-gray-50 dark:bg-[#0a0a0a]">
                       {product.imagenes && product.imagenes.length > 0 ? (
                         <img
                           src={getImageUrl(product.imagenes[0])}
                           alt={product.nombre}
-                          className="absolute inset-0 w-full h-full object-contain p-3 group-hover:scale-105 transition-transform duration-700 ease-out"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
                         />
                       ) : (
-                        <div className="absolute inset-0 flex items-center justify-center text-gray-400 dark:text-[#8b7a9f] text-xs sm:text-sm">
+                        <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-[#8b7a9f] text-xs sm:text-sm">
                           Sin imagen
                         </div>
                       )}
                       
                       {/* Overlay sutil al hover */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                     </div>
 
                     {/* Product Info */}
-                    <div className="p-3 sm:p-4 space-y-2 border-t border-gray-100 dark:border-[#2d1f3f]">
+                    <div className="p-3 sm:p-4 space-y-2">
                       {/* Nombre del producto */}
-                      <h4 className="text-sm sm:text-base font-medium text-gray-800 dark:text-white line-clamp-2 min-h-[2.5rem] group-hover:text-[#C9A96E] transition-colors duration-300">
+                      <h4 className="text-sm sm:text-base font-medium text-gray-800 dark:text-white line-clamp-2 group-hover:text-[#C9A96E] transition-colors duration-300">
                         {product.nombre}
                       </h4>
                       
@@ -328,13 +328,6 @@ const Catalogo = () => {
                           {product.colores.map(c => renderColorBadge(c, 'small'))}
                         </div>
                       )}
-
-                      {/* Botón de acción */}
-                      <div className="pt-2">
-                        <div className="text-xs text-gray-500 dark:text-[#9d8fb3] text-center py-1.5 border-t border-gray-100 dark:border-[#2d1f3f] group-hover:text-[#C9A96E] transition-colors">
-                          Ver detalles →
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -429,38 +422,43 @@ const Catalogo = () => {
                 )}
               </div>
 
-              {/* Product Details - Scrollable */}
-              <div className="flex-1 p-6 overflow-y-auto">
-                <h2 className="text-2xl md:text-3xl font-medium text-gray-800 dark:text-white mb-4 pr-12">
-                  {selectedProduct.nombre}
-                </h2>
+              {/* Product Details - Scrollable con WhatsApp fijo abajo */}
+              <div className="flex-1 flex flex-col overflow-hidden">
+                {/* Contenido scrollable */}
+                <div className="flex-1 overflow-y-auto p-6">
+                  <h2 className="text-2xl md:text-3xl font-medium text-gray-800 dark:text-white mb-4 pr-12">
+                    {selectedProduct.nombre}
+                  </h2>
 
-                {selectedProduct.descripcion && (
-                  <p className="text-gray-600 dark:text-[#c4b5d4] text-base leading-relaxed mb-6">
-                    {selectedProduct.descripcion}
-                  </p>
-                )}
-
-                {/* Colores disponibles */}
-                {selectedProduct.colores && selectedProduct.colores.length > 0 && (
-                  <div className="mb-6">
-                    <p className="text-xs uppercase tracking-wider text-gray-400 dark:text-[#8b7a9f] mb-3">
-                      Colores disponibles
+                  {selectedProduct.descripcion && (
+                    <p className="text-gray-600 dark:text-[#c4b5d4] text-base leading-relaxed mb-6">
+                      {selectedProduct.descripcion}
                     </p>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedProduct.colores.map(c => renderColorBadge(c))}
-                    </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Botón de WhatsApp */}
-                <button
-                  onClick={handleWhatsApp}
-                  className="w-full py-4 bg-[#25D366] hover:bg-[#20BD5A] text-white text-base font-medium rounded-xl transition-all flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] shadow-lg mt-8"
-                >
-                  <MessageCircle className="w-5 h-5" />
-                  Consultar por WhatsApp
-                </button>
+                  {/* Colores disponibles */}
+                  {selectedProduct.colores && selectedProduct.colores.length > 0 && (
+                    <div className="mb-6">
+                      <p className="text-xs uppercase tracking-wider text-gray-400 dark:text-[#8b7a9f] mb-3">
+                        Colores disponibles
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedProduct.colores.map(c => renderColorBadge(c))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Botón de WhatsApp FIJO en la parte inferior */}
+                <div className="p-6 border-t border-gray-100 dark:border-[#2d1f3f] bg-white dark:bg-[#1a1520]">
+                  <button
+                    onClick={handleWhatsApp}
+                    className="w-full py-4 bg-[#25D366] hover:bg-[#20BD5A] text-white text-base font-medium rounded-xl transition-all flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] shadow-lg"
+                  >
+                    <MessageCircle className="w-5 h-5" />
+                    Consultar por WhatsApp
+                  </button>
+                </div>
               </div>
             </div>
           </div>

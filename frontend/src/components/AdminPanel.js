@@ -42,6 +42,10 @@ const AdminPanel = () => {
   const [colorInput, setColorInput] = useState('');
   const [isDetectingColor, setIsDetectingColor] = useState(false);
 
+  // Nuevo estado para vista de imagen y confirmación de eliminación
+  const [viewingImage, setViewingImage] = useState(null);
+  const [imageToDelete, setImageToDelete] = useState(null);
+
   const filteredProducts = searchTerm ? searchProducts(searchTerm) : products;
 
   // Get image URL
@@ -151,6 +155,27 @@ const AdminPanel = () => {
   const unmarkImageForDeletion = (imageIndex) => {
     setImagesToDelete(prev => prev.filter(i => i !== imageIndex));
   };
+
+  // Nuevas funciones para ver imagen y eliminar con confirmación
+  const handleViewImage = (image) => {
+    setViewingImage(image);
+  };
+
+  const handleDeleteImageClick = (index) => {
+    setImageToDelete(index);
+  };
+
+  const confirmDeleteImage = () => {
+    if (imageToDelete !== null) {
+      markExistingImageForDeletion(imageToDelete);
+      setImageToDelete(null);
+    }
+  };
+
+  const cancelDeleteImage = () => {
+    setImageToDelete(null);
+  };
+
 
   // Detect color using AI
   const detectColor = async () => {
@@ -551,9 +576,9 @@ const AdminPanel = () => {
                       {existingImages.map((image, idx) => (
                         <div
                           key={`existing-${idx}`}
-                          className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                          className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all group ${
                             imagesToDelete.includes(idx)
-                              ? 'border-red-500 opacity-50'
+                              ? 'border-red-500 opacity-30'
                               : 'border-gray-200 dark:border-white/10'
                           }`}
                         >
@@ -562,36 +587,64 @@ const AdminPanel = () => {
                             alt={`Imagen ${idx + 1}`}
                             className="w-full h-full object-cover"
                           />
-                          <button
-                            type="button"
-                            onClick={() => 
-                              imagesToDelete.includes(idx)
-                                ? unmarkImageForDeletion(idx)
-                                : markExistingImageForDeletion(idx)
-                            }
-                            className="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs"
-                          >
-                            {imagesToDelete.includes(idx) ? '↺' : '×'}
-                          </button>
+                          {/* Overlay con botones al hover - Solo si no está marcada para eliminar */}
+                          {!imagesToDelete.includes(idx) && (
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => handleViewImage(image)}
+                                className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded-md transition-colors flex items-center gap-1"
+                              >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                Ver
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteImageClick(idx)}
+                                className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs rounded-md transition-colors flex items-center gap-1"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                                Eliminar
+                              </button>
+                            </div>
+                          )}
+                          {/* Indicador de eliminación */}
+                          {imagesToDelete.includes(idx) && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <button
+                                type="button"
+                                onClick={() => unmarkImageForDeletion(idx)}
+                                className="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-xs rounded-md"
+                              >
+                                Deshacer
+                              </button>
+                            </div>
+                          )}
                         </div>
                       ))}
                       {imagePreviews.map((preview, idx) => (
                         <div
                           key={preview.id}
-                          className="relative aspect-square rounded-lg overflow-hidden border-2 border-green-500"
+                          className="relative aspect-square rounded-lg overflow-hidden border-2 border-green-500 group"
                         >
                           <img
                             src={preview.url}
                             alt={`Nueva ${idx + 1}`}
                             className="w-full h-full object-cover"
                           />
-                          <button
-                            type="button"
-                            onClick={() => removeNewImage(idx)}
-                            className="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs"
-                          >
-                            ×
-                          </button>
+                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <button
+                              type="button"
+                              onClick={() => removeNewImage(idx)}
+                              className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs rounded-md flex items-center gap-1"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                              Eliminar
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -692,6 +745,63 @@ const AdminPanel = () => {
                 className="flex-1 py-2 px-4 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all text-sm"
               >
                 Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para Ver Imagen */}
+      {viewingImage && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-fadeIn"
+          onClick={() => setViewingImage(null)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh] w-full">
+            <button
+              onClick={() => setViewingImage(null)}
+              className="absolute -top-12 right-0 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
+            >
+              <X className="w-6 h-6 text-white" />
+            </button>
+            <img
+              src={getImageUrl(viewingImage)}
+              alt="Vista previa"
+              className="w-full h-full object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Confirmación de Eliminación de Imagen */}
+      {imageToDelete !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white dark:bg-[#2d2640] rounded-2xl w-full max-w-sm p-5 shadow-2xl animate-slideIn">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                <AlertCircle className="w-5 h-5 text-red-500" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-800 dark:text-white">Eliminar imagen</h3>
+                <p className="text-xs text-gray-500 dark:text-white/60">¿Estás seguro?</p>
+              </div>
+            </div>
+            <p className="text-gray-600 dark:text-white/80 text-sm mb-4">
+              Esta imagen será eliminada cuando guardes el producto.
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={cancelDeleteImage}
+                className="flex-1 py-2 px-4 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-white/80 rounded-xl hover:bg-gray-100 dark:hover:bg-[#1a1625] transition-all text-sm"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmDeleteImage}
+                className="flex-1 py-2 px-4 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all text-sm"
+              >
+                Sí, eliminar
               </button>
             </div>
           </div>
