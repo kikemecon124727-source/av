@@ -12,7 +12,6 @@ const Catalogo = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
-  const [isImageZoomed, setIsImageZoomed] = useState(false); // Estado del zoom
   const searchInputRef = useRef(null);
   const productsRef = useRef(null);
 
@@ -43,7 +42,6 @@ const Catalogo = () => {
   const closeProductModal = () => {
     setSelectedProduct(null);
     setCurrentImageIndex(0);
-    setIsImageZoomed(false); // Resetear zoom al cerrar
     document.body.style.overflow = 'auto';
   };
 
@@ -52,7 +50,6 @@ const Catalogo = () => {
       setCurrentImageIndex((prev) => 
         prev === selectedProduct.imagenes.length - 1 ? 0 : prev + 1
       );
-      setIsImageZoomed(false); // Quitar zoom al cambiar imagen
     }
   };
 
@@ -61,13 +58,7 @@ const Catalogo = () => {
       setCurrentImageIndex((prev) => 
         prev === 0 ? selectedProduct.imagenes.length - 1 : prev - 1
       );
-      setIsImageZoomed(false); // Quitar zoom al cambiar imagen
     }
-  };
-
-  // Toggle zoom al hacer click en la imagen
-  const toggleImageZoom = () => {
-    setIsImageZoomed(!isImageZoomed);
   };
 
   const getImageUrl = (image) => {
@@ -366,21 +357,14 @@ const Catalogo = () => {
               </button>
 
               <div className="flex flex-col sm:flex-row">
-                {/* Image Carousel */}
-                <div className="relative w-full sm:flex-1 aspect-square sm:aspect-auto sm:min-h-[450px] bg-gray-50 dark:bg-[#0a0a0a] overflow-hidden">
+                {/* Image Carousel con Zoom Tipo Lupa */}
+                <div className="relative w-full sm:flex-1 aspect-square sm:aspect-auto sm:min-h-[450px] bg-gray-50 dark:bg-[#0a0a0a]">
                   {selectedProduct.imagenes && selectedProduct.imagenes.length > 0 ? (
                     <>
-                      <img
+                      <ImageMagnifier
                         src={getImageUrl(selectedProduct.imagenes[currentImageIndex])}
                         alt={`${selectedProduct.nombre} - ${currentImageIndex + 1}`}
-                        onClick={toggleImageZoom}
-                        onMouseLeave={() => setIsImageZoomed(false)}
-                        className={`w-full h-full object-contain cursor-pointer transition-all duration-300 ${
-                          isImageZoomed ? 'scale-150' : 'scale-100'
-                        }`}
-                        style={{
-                          transformOrigin: 'center center'
-                        }}
+                        zoomLevel={2.5}
                       />
 
                       {selectedProduct.imagenes.length > 1 && (
@@ -402,19 +386,12 @@ const Catalogo = () => {
                             {selectedProduct.imagenes.map((_, idx) => (
                               <button
                                 key={idx}
-                                onClick={() => { setCurrentImageIndex(idx); setIsImageZoomed(false); }}
+                                onClick={() => setCurrentImageIndex(idx)}
                                 className={`h-1.5 rounded-full transition-all ${idx === currentImageIndex ? 'bg-[#C9A96E] w-5' : 'bg-gray-400/50 w-1.5 hover:bg-gray-400'}`}
                               />
                             ))}
                           </div>
                         </>
-                      )}
-
-                      {/* Indicador de zoom */}
-                      {!isImageZoomed && (
-                        <div className="absolute top-4 right-4 bg-black/60 text-white text-xs px-3 py-1.5 rounded-full backdrop-blur-sm">
-                          Click para zoom
-                        </div>
                       )}
                     </>
                   ) : (
