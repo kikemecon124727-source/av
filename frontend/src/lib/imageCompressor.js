@@ -12,7 +12,7 @@ export const compressAndConvertToWebP = async (file, options = {}) => {
     maxWidthOrHeight: 1200,
     useWebWorker: true,
     fileType: 'image/webp',
-    initialQuality: 0.8,
+    initialQuality: 0.8,  // 80% de calidad - mucho mejor
     alwaysKeepResolution: false,
   };
 

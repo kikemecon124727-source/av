@@ -12,6 +12,7 @@ const Catalogo = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
+  const [isImageZoomed, setIsImageZoomed] = useState(false); // Estado del zoom
   const searchInputRef = useRef(null);
   const productsRef = useRef(null);
 
@@ -42,6 +43,7 @@ const Catalogo = () => {
   const closeProductModal = () => {
     setSelectedProduct(null);
     setCurrentImageIndex(0);
+    setIsImageZoomed(false); // Resetear zoom al cerrar
     document.body.style.overflow = 'auto';
   };
 
@@ -50,6 +52,7 @@ const Catalogo = () => {
       setCurrentImageIndex((prev) => 
         prev === selectedProduct.imagenes.length - 1 ? 0 : prev + 1
       );
+      setIsImageZoomed(false); // Quitar zoom al cambiar imagen
     }
   };
 
@@ -58,7 +61,13 @@ const Catalogo = () => {
       setCurrentImageIndex((prev) => 
         prev === 0 ? selectedProduct.imagenes.length - 1 : prev - 1
       );
+      setIsImageZoomed(false); // Quitar zoom al cambiar imagen
     }
+  };
+
+  // Toggle zoom al hacer click en la imagen
+  const toggleImageZoom = () => {
+    setIsImageZoomed(!isImageZoomed);
   };
 
   const getImageUrl = (image) => {
@@ -358,40 +367,54 @@ const Catalogo = () => {
 
               <div className="flex flex-col sm:flex-row">
                 {/* Image Carousel */}
-                <div className="relative w-full sm:flex-1 aspect-square sm:aspect-auto sm:min-h-[450px] bg-gray-50 dark:bg-[#0a0a0a]">
+                <div className="relative w-full sm:flex-1 aspect-square sm:aspect-auto sm:min-h-[450px] bg-gray-50 dark:bg-[#0a0a0a] overflow-hidden">
                   {selectedProduct.imagenes && selectedProduct.imagenes.length > 0 ? (
                     <>
                       <img
                         src={getImageUrl(selectedProduct.imagenes[currentImageIndex])}
                         alt={`${selectedProduct.nombre} - ${currentImageIndex + 1}`}
-                        className="w-full h-full object-contain"
+                        onClick={toggleImageZoom}
+                        onMouseLeave={() => setIsImageZoomed(false)}
+                        className={`w-full h-full object-contain cursor-pointer transition-all duration-300 ${
+                          isImageZoomed ? 'scale-150' : 'scale-100'
+                        }`}
+                        style={{
+                          transformOrigin: 'center center'
+                        }}
                       />
 
                       {selectedProduct.imagenes.length > 1 && (
                         <>
                           <button
                             onClick={prevImage}
-                            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 dark:bg-[#2d1f3f]/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+                            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 dark:bg-[#2d1f3f]/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform z-10"
                           >
                             <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-white rotate-90" />
                           </button>
                           <button
                             onClick={nextImage}
-                            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 dark:bg-[#2d1f3f]/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+                            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 dark:bg-[#2d1f3f]/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform z-10"
                           >
                             <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-white -rotate-90" />
                           </button>
 
-                          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
+                          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
                             {selectedProduct.imagenes.map((_, idx) => (
                               <button
                                 key={idx}
-                                onClick={() => setCurrentImageIndex(idx)}
+                                onClick={() => { setCurrentImageIndex(idx); setIsImageZoomed(false); }}
                                 className={`h-1.5 rounded-full transition-all ${idx === currentImageIndex ? 'bg-[#C9A96E] w-5' : 'bg-gray-400/50 w-1.5 hover:bg-gray-400'}`}
                               />
                             ))}
                           </div>
                         </>
+                      )}
+
+                      {/* Indicador de zoom */}
+                      {!isImageZoomed && (
+                        <div className="absolute top-4 right-4 bg-black/60 text-white text-xs px-3 py-1.5 rounded-full backdrop-blur-sm">
+                          Click para zoom
+                        </div>
                       )}
                     </>
                   ) : (

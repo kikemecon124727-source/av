@@ -56,10 +56,11 @@ export const useProducts = () => {
   // Procesar imagen: comprimir y convertir a base64
   const processImage = async (file) => {
     try {
-      // Comprimir y convertir a WebP
+      // Comprimir y convertir a WebP con MEJOR CALIDAD (80%)
       const compressedFile = await compressAndConvertToWebP(file, {
-        maxSizeMB: 0.3, // Máximo 300KB para guardar en Firestore
-        maxWidthOrHeight: 800,
+        maxSizeMB: 0.5, // Aumentado a 500KB para mejor calidad
+        maxWidthOrHeight: 1200, // Resolución más alta
+        initialQuality: 0.8, // 80% de calidad
       });
       
       // Convertir a base64
