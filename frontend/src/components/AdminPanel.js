@@ -841,151 +841,150 @@ const AdminPanel = () => {
         </div>
       )}
 
-      {/* Modal de Ajuste de Imagen */}
+      {/* Modal de Ajuste de Imagen - REDISEÑADO ELEGANTE */}
       {adjustingImage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white dark:bg-[#2d2640] rounded-2xl w-full max-w-3xl shadow-2xl animate-slideIn overflow-hidden">
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-white/10">
-              <h3 className="font-semibold text-gray-800 dark:text-white">Ajustar Encuadre de Imagen</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-md animate-fadeIn">
+          <div className="bg-white dark:bg-[#1a1520] rounded-3xl w-full max-w-5xl shadow-2xl animate-slideIn overflow-hidden">
+            
+            {/* Header Elegante */}
+            <div className="relative bg-gradient-to-r from-[#C9A96E] to-[#B8986A] p-6">
+              <h3 className="text-2xl font-light text-white tracking-wide">Ajustar Encuadre</h3>
+              <p className="text-white/80 text-sm mt-1">Elige qué parte de la imagen mostrar en el catálogo</p>
               <button
                 onClick={() => setAdjustingImage(null)}
-                className="w-8 h-8 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full flex items-center justify-center transition-colors"
+                className="absolute top-6 right-6 w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-all"
               >
-                <X className="w-5 h-5 text-gray-600 dark:text-white" />
+                <X className="w-5 h-5 text-white" />
               </button>
             </div>
 
-            {/* Preview Container */}
-            <div className="p-6">
-              <p className="text-sm text-gray-600 dark:text-white/70 mb-4">
-                Selecciona cómo quieres que se vea la imagen en las tarjetas del catálogo:
-              </p>
-              
-              {/* Preview Box */}
-              <div className="relative w-full aspect-square bg-gray-100 dark:bg-[#1a1625] rounded-xl overflow-hidden mb-4 border-2 border-gray-300 dark:border-white/20">
-                <img
-                  src={getImageUrl(adjustingImage.image)}
-                  alt="Preview"
-                  className="w-full h-full object-cover transition-all duration-300"
-                  style={{
-                    objectPosition: imagePositions[adjustingImage.index] || 'center'
-                  }}
-                />
-              </div>
+            {/* Contenido Principal */}
+            <div className="p-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                {/* Vista Previa Grande */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-white/80 uppercase tracking-wider">
+                      Vista Previa
+                    </h4>
+                    <span className="text-xs text-gray-500 dark:text-white/60">
+                      Así se verá en el catálogo
+                    </span>
+                  </div>
+                  
+                  {/* Preview Box Grande */}
+                  <div className="relative w-full aspect-square bg-gradient-to-br from-gray-100 to-gray-200 dark:from-[#0a0a0a] dark:to-[#1a1520] rounded-2xl overflow-hidden shadow-inner border-4 border-gray-200 dark:border-[#2d1f3f]">
+                    <img
+                      src={getImageUrl(adjustingImage.image)}
+                      alt="Preview"
+                      className="w-full h-full object-cover transition-all duration-500"
+                      style={{
+                        objectPosition: imagePositions[adjustingImage.index] || 'center'
+                      }}
+                    />
+                    {/* Overlay con cruz centrada */}
+                    <div className="absolute inset-0 pointer-events-none">
+                      <div className="absolute top-1/2 left-0 right-0 h-px bg-white/30"></div>
+                      <div className="absolute left-1/2 top-0 bottom-0 w-px bg-white/30"></div>
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-[#C9A96E] shadow-lg"></div>
+                    </div>
+                  </div>
+                </div>
 
-              {/* Position Controls */}
-              <div className="space-y-3">
-                <p className="text-xs font-medium text-gray-700 dark:text-white/80 uppercase tracking-wider">
-                  Posición del encuadre
-                </p>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    onClick={() => handlePositionChange('top left')}
-                    className={`py-2 px-3 rounded-lg border text-sm transition-all ${
-                      imagePositions[adjustingImage.index] === 'top left'
-                        ? 'bg-[#C9A96E] text-white border-[#C9A96E]'
-                        : 'border-gray-300 dark:border-white/20 text-gray-700 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-white/5'
-                    }`}
-                  >
-                    Superior Izq
-                  </button>
-                  <button
-                    onClick={() => handlePositionChange('top center')}
-                    className={`py-2 px-3 rounded-lg border text-sm transition-all ${
-                      imagePositions[adjustingImage.index] === 'top center'
-                        ? 'bg-[#C9A96E] text-white border-[#C9A96E]'
-                        : 'border-gray-300 dark:border-white/20 text-gray-700 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-white/5'
-                    }`}
-                  >
-                    Superior Centro
-                  </button>
-                  <button
-                    onClick={() => handlePositionChange('top right')}
-                    className={`py-2 px-3 rounded-lg border text-sm transition-all ${
-                      imagePositions[adjustingImage.index] === 'top right'
-                        ? 'bg-[#C9A96E] text-white border-[#C9A96E]'
-                        : 'border-gray-300 dark:border-white/20 text-gray-700 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-white/5'
-                    }`}
-                  >
-                    Superior Der
-                  </button>
-                  <button
-                    onClick={() => handlePositionChange('center left')}
-                    className={`py-2 px-3 rounded-lg border text-sm transition-all ${
-                      imagePositions[adjustingImage.index] === 'center left'
-                        ? 'bg-[#C9A96E] text-white border-[#C9A96E]'
-                        : 'border-gray-300 dark:border-white/20 text-gray-700 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-white/5'
-                    }`}
-                  >
-                    Centro Izq
-                  </button>
-                  <button
-                    onClick={() => handlePositionChange('center')}
-                    className={`py-2 px-3 rounded-lg border text-sm transition-all ${
-                      !imagePositions[adjustingImage.index] || imagePositions[adjustingImage.index] === 'center'
-                        ? 'bg-[#C9A96E] text-white border-[#C9A96E]'
-                        : 'border-gray-300 dark:border-white/20 text-gray-700 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-white/5'
-                    }`}
-                  >
-                    Centro
-                  </button>
-                  <button
-                    onClick={() => handlePositionChange('center right')}
-                    className={`py-2 px-3 rounded-lg border text-sm transition-all ${
-                      imagePositions[adjustingImage.index] === 'center right'
-                        ? 'bg-[#C9A96E] text-white border-[#C9A96E]'
-                        : 'border-gray-300 dark:border-white/20 text-gray-700 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-white/5'
-                    }`}
-                  >
-                    Centro Der
-                  </button>
-                  <button
-                    onClick={() => handlePositionChange('bottom left')}
-                    className={`py-2 px-3 rounded-lg border text-sm transition-all ${
-                      imagePositions[adjustingImage.index] === 'bottom left'
-                        ? 'bg-[#C9A96E] text-white border-[#C9A96E]'
-                        : 'border-gray-300 dark:border-white/20 text-gray-700 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-white/5'
-                    }`}
-                  >
-                    Inferior Izq
-                  </button>
-                  <button
-                    onClick={() => handlePositionChange('bottom center')}
-                    className={`py-2 px-3 rounded-lg border text-sm transition-all ${
-                      imagePositions[adjustingImage.index] === 'bottom center'
-                        ? 'bg-[#C9A96E] text-white border-[#C9A96E]'
-                        : 'border-gray-300 dark:border-white/20 text-gray-700 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-white/5'
-                    }`}
-                  >
-                    Inferior Centro
-                  </button>
-                  <button
-                    onClick={() => handlePositionChange('bottom right')}
-                    className={`py-2 px-3 rounded-lg border text-sm transition-all ${
-                      imagePositions[adjustingImage.index] === 'bottom right'
-                        ? 'bg-[#C9A96E] text-white border-[#C9A96E]'
-                        : 'border-gray-300 dark:border-white/20 text-gray-700 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-white/5'
-                    }`}
-                  >
-                    Inferior Der
-                  </button>
+                {/* Controles de Posición Elegantes */}
+                <div className="space-y-6">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-white/80 uppercase tracking-wider mb-4">
+                      Posición del Encuadre
+                    </h4>
+                    <p className="text-xs text-gray-500 dark:text-white/60 mb-6">
+                      Selecciona hacia dónde centrar la imagen
+                    </p>
+                  </div>
+
+                  {/* Grid de Posiciones 3x3 - MÁS ESPACIADO */}
+                  <div className="grid grid-cols-3 gap-4">
+                    {[
+                      { pos: 'top left', label: '↖', desc: 'Superior Izq' },
+                      { pos: 'top center', label: '↑', desc: 'Superior' },
+                      { pos: 'top right', label: '↗', desc: 'Superior Der' },
+                      { pos: 'center left', label: '←', desc: 'Izquierda' },
+                      { pos: 'center', label: '●', desc: 'Centro' },
+                      { pos: 'center right', label: '→', desc: 'Derecha' },
+                      { pos: 'bottom left', label: '↙', desc: 'Inferior Izq' },
+                      { pos: 'bottom center', label: '↓', desc: 'Inferior' },
+                      { pos: 'bottom right', label: '↘', desc: 'Inferior Der' }
+                    ].map(({ pos, label, desc }) => {
+                      const isSelected = !imagePositions[adjustingImage.index] 
+                        ? pos === 'center' 
+                        : imagePositions[adjustingImage.index] === pos;
+                      
+                      return (
+                        <button
+                          key={pos}
+                          onClick={() => handlePositionChange(pos)}
+                          className={`group relative py-6 rounded-xl border-2 transition-all duration-300 ${
+                            isSelected
+                              ? 'bg-gradient-to-br from-[#C9A96E] to-[#B8986A] border-[#C9A96E] shadow-lg scale-105'
+                              : 'border-gray-300 dark:border-white/20 hover:border-[#C9A96E] hover:shadow-md hover:scale-105'
+                          }`}
+                        >
+                          <div className="flex flex-col items-center gap-2">
+                            <span className={`text-3xl font-light transition-colors ${
+                              isSelected ? 'text-white' : 'text-gray-400 dark:text-white/40 group-hover:text-[#C9A96E]'
+                            }`}>
+                              {label}
+                            </span>
+                            <span className={`text-xs font-medium transition-colors ${
+                              isSelected ? 'text-white' : 'text-gray-500 dark:text-white/60 group-hover:text-[#C9A96E]'
+                            }`}>
+                              {desc}
+                            </span>
+                          </div>
+                          {isSelected && (
+                            <div className="absolute -top-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md">
+                              <Check className="w-3 h-3 text-[#C9A96E]" />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Info adicional */}
+                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800/30">
+                    <div className="flex gap-3">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-800/30 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium text-blue-900 dark:text-blue-300 mb-1">Consejo</p>
+                        <p className="text-xs text-blue-700 dark:text-blue-400">
+                          Usa las flechas para centrar la parte más importante del producto
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Footer Actions */}
-            <div className="flex gap-2 p-4 border-t border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#1a1625]">
+            {/* Footer con Botones */}
+            <div className="flex gap-3 p-6 border-t border-gray-200 dark:border-[#2d1f3f] bg-gray-50 dark:bg-[#0a0a0a]">
               <button
                 onClick={() => setAdjustingImage(null)}
-                className="flex-1 py-2.5 px-4 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-white/80 rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all text-sm font-medium"
+                className="flex-1 py-3.5 px-6 border-2 border-gray-300 dark:border-white/20 text-gray-700 dark:text-white rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all text-sm font-medium"
               >
                 Cancelar
               </button>
               <button
                 onClick={saveImagePosition}
-                className="flex-1 py-2.5 px-4 bg-[#C9A96E] hover:bg-[#B8986A] text-white rounded-xl transition-all text-sm font-medium shadow-md"
+                className="flex-1 py-3.5 px-6 bg-gradient-to-r from-[#C9A96E] to-[#B8986A] hover:from-[#B8986A] hover:to-[#A88759] text-white rounded-xl transition-all text-sm font-medium shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
               >
+                <Check className="w-4 h-4" />
                 Guardar Ajuste
               </button>
             </div>
