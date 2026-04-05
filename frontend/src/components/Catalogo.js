@@ -290,13 +290,16 @@ const Catalogo = () => {
                 >
                   {/* Product Card - Diseño con aspect-square */}
                   <div className="bg-white dark:bg-[#1a1520] rounded-xl overflow-hidden shadow-sm hover:shadow-2xl dark:shadow-black/30 transition-all duration-500 border border-gray-100 dark:border-[#2d1f3f]">
-                    {/* Product Image - Aspect ratio cuadrado */}
+                    {/* Product Image - Aspect ratio cuadrado CON POSICIÓN */}
                     <div className="relative w-full aspect-square overflow-hidden bg-gray-50 dark:bg-[#0a0a0a]">
                       {product.imagenes && product.imagenes.length > 0 ? (
                         <img
                           src={getImageUrl(product.imagenes[0])}
                           alt={product.nombre}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                          style={{
+                            objectPosition: product.imagenes[0].position || 'center'
+                          }}
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-[#8b7a9f] text-xs sm:text-sm">

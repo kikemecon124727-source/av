@@ -182,7 +182,12 @@ const AdminPanel = () => {
 
   // Funciones para ajuste de imagen
   const handleAdjustImage = (image, index) => {
+    const currentPosition = image.position || 'center';
     setAdjustingImage({ image, index });
+    setImagePositions(prev => ({
+      ...prev,
+      [index]: currentPosition
+    }));
   };
 
   const handlePositionChange = (position) => {
@@ -195,7 +200,18 @@ const AdminPanel = () => {
   };
 
   const saveImagePosition = () => {
-    // Aquí podrías guardar la posición en la metadata de la imagen
+    if (adjustingImage) {
+      // Actualizar la posición de la imagen existente
+      const updatedImages = [...existingImages];
+      if (updatedImages[adjustingImage.index]) {
+        updatedImages[adjustingImage.index] = {
+          ...updatedImages[adjustingImage.index],
+          position: imagePositions[adjustingImage.index] || 'center'
+        };
+        setExistingImages(updatedImages);
+      }
+      toast.success('Posición guardada');
+    }
     setAdjustingImage(null);
   };
 
@@ -593,90 +609,102 @@ const AdminPanel = () => {
                     Imágenes * <span className="text-gray-400">(máx. {MAX_IMAGES})</span>
                   </label>
 
-                  {/* Existing + New Images Grid - Más grande (grid-cols-4) */}
+                  {/* Existing + New Images Grid - BOTONES REDISEÑADOS */}
                   {(existingImages.length > 0 || imagePreviews.length > 0) && (
-                    <div className="grid grid-cols-4 gap-3 mb-3">
+                    <div className="grid grid-cols-4 gap-4 mb-3">
                       {existingImages.map((image, idx) => (
                         <div
                           key={`existing-${idx}`}
-                          className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all group ${
-                            imagesToDelete.includes(idx)
-                              ? 'border-red-500 opacity-30'
-                              : 'border-gray-200 dark:border-white/10'
-                          }`}
+                          className="relative aspect-square rounded-xl overflow-hidden border-2 border-gray-200 dark:border-white/10 group"
                         >
                           <img
                             src={getImageUrl(image)}
                             alt={`Imagen ${idx + 1}`}
-                            className="w-full h-full object-cover"
+                            className={`w-full h-full object-cover transition-all ${
+                              imagesToDelete.includes(idx) ? 'opacity-30' : ''
+                            }`}
                           />
-                          {/* Overlay con botones al hover - Solo si no está marcada para eliminar */}
+                          
+                          {/* Overlay con botones - Solo si NO está marcada para eliminar */}
                           {!imagesToDelete.includes(idx) && (
-                            <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                              <button
-                                type="button"
-                                onClick={() => handleViewImage(image)}
-                                className="w-10 h-10 bg-blue-500 hover:bg-blue-600 text-white rounded-full transition-colors flex items-center justify-center shadow-lg"
-                                title="Ver imagen"
-                              >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleAdjustImage(image, idx)}
-                                className="w-10 h-10 bg-purple-500 hover:bg-purple-600 text-white rounded-full transition-colors flex items-center justify-center shadow-lg"
-                                title="Ajustar encuadre"
-                              >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                                </svg>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteImageClick(idx)}
-                                className="w-10 h-10 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors flex items-center justify-center shadow-lg"
-                                title="Eliminar imagen"
-                              >
-                                <Trash2 className="w-5 h-5" />
-                              </button>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300">
+                              {/* Botones en la parte inferior */}
+                              <div className="absolute bottom-0 left-0 right-0 p-3 flex gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleViewImage(image)}
+                                  className="flex-1 py-2.5 bg-white/95 hover:bg-white text-gray-800 rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-lg hover:scale-105 active:scale-95"
+                                  title="Ver imagen"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                  </svg>
+                                  <span className="text-xs font-medium">Ver</span>
+                                </button>
+                                
+                                <button
+                                  type="button"
+                                  onClick={() => handleAdjustImage(image, idx)}
+                                  className="flex-1 py-2.5 bg-purple-500/95 hover:bg-purple-500 text-white rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-lg hover:scale-105 active:scale-95"
+                                  title="Ajustar"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                                  </svg>
+                                  <span className="text-xs font-medium">Ajustar</span>
+                                </button>
+                                
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteImageClick(idx)}
+                                  className="flex-1 py-2.5 bg-red-500/95 hover:bg-red-500 text-white rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-lg hover:scale-105 active:scale-95"
+                                  title="Eliminar"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                  <span className="text-xs font-medium">Borrar</span>
+                                </button>
+                              </div>
                             </div>
                           )}
-                          {/* Indicador de eliminación */}
+                          
+                          {/* Botón de deshacer - SIN opacidad */}
                           {imagesToDelete.includes(idx) && (
-                            <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/60">
                               <button
                                 type="button"
                                 onClick={() => unmarkImageForDeletion(idx)}
-                                className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm rounded-md shadow-lg"
+                                className="px-6 py-3 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg shadow-xl hover:scale-110 active:scale-95 transition-all"
                               >
-                                Deshacer
+                                ↺ Deshacer
                               </button>
                             </div>
                           )}
                         </div>
                       ))}
+                      
                       {imagePreviews.map((preview, idx) => (
                         <div
                           key={preview.id}
-                          className="relative aspect-square rounded-lg overflow-hidden border-2 border-green-500 group"
+                          className="relative aspect-square rounded-xl overflow-hidden border-2 border-green-500 group"
                         >
                           <img
                             src={preview.url}
                             alt={`Nueva ${idx + 1}`}
                             className="w-full h-full object-cover"
                           />
-                          <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <button
-                              type="button"
-                              onClick={() => removeNewImage(idx)}
-                              className="w-10 h-10 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors flex items-center justify-center shadow-lg"
-                              title="Eliminar"
-                            >
-                              <Trash2 className="w-5 h-5" />
-                            </button>
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300">
+                            <div className="absolute bottom-0 left-0 right-0 p-3">
+                              <button
+                                type="button"
+                                onClick={() => removeNewImage(idx)}
+                                className="w-full py-2.5 bg-red-500/95 hover:bg-red-500 text-white rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-lg hover:scale-105 active:scale-95"
+                                title="Eliminar"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                                <span className="text-xs font-medium">Borrar</span>
+                              </button>
+                            </div>
                           </div>
                         </div>
                       ))}
