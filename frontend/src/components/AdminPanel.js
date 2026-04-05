@@ -45,6 +45,10 @@ const AdminPanel = () => {
   // Nuevo estado para vista de imagen y confirmación de eliminación
   const [viewingImage, setViewingImage] = useState(null);
   const [imageToDelete, setImageToDelete] = useState(null);
+  
+  // Estado para ajuste de imagen
+  const [adjustingImage, setAdjustingImage] = useState(null);
+  const [imagePositions, setImagePositions] = useState({});
 
   const filteredProducts = searchTerm ? searchProducts(searchTerm) : products;
 
@@ -174,6 +178,25 @@ const AdminPanel = () => {
 
   const cancelDeleteImage = () => {
     setImageToDelete(null);
+  };
+
+  // Funciones para ajuste de imagen
+  const handleAdjustImage = (image, index) => {
+    setAdjustingImage({ image, index });
+  };
+
+  const handlePositionChange = (position) => {
+    if (adjustingImage) {
+      setImagePositions(prev => ({
+        ...prev,
+        [adjustingImage.index]: position
+      }));
+    }
+  };
+
+  const saveImagePosition = () => {
+    // Aquí podrías guardar la posición en la metadata de la imagen
+    setAdjustingImage(null);
   };
 
 
@@ -570,9 +593,9 @@ const AdminPanel = () => {
                     Imágenes * <span className="text-gray-400">(máx. {MAX_IMAGES})</span>
                   </label>
 
-                  {/* Existing + New Images Grid */}
+                  {/* Existing + New Images Grid - Más grande (grid-cols-4) */}
                   {(existingImages.length > 0 || imagePreviews.length > 0) && (
-                    <div className="grid grid-cols-5 gap-2 mb-3">
+                    <div className="grid grid-cols-4 gap-3 mb-3">
                       {existingImages.map((image, idx) => (
                         <div
                           key={`existing-${idx}`}
@@ -589,25 +612,35 @@ const AdminPanel = () => {
                           />
                           {/* Overlay con botones al hover - Solo si no está marcada para eliminar */}
                           {!imagesToDelete.includes(idx) && (
-                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                            <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                               <button
                                 type="button"
                                 onClick={() => handleViewImage(image)}
-                                className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded-md transition-colors flex items-center gap-1"
+                                className="w-10 h-10 bg-blue-500 hover:bg-blue-600 text-white rounded-full transition-colors flex items-center justify-center shadow-lg"
+                                title="Ver imagen"
                               >
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                 </svg>
-                                Ver
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleAdjustImage(image, idx)}
+                                className="w-10 h-10 bg-purple-500 hover:bg-purple-600 text-white rounded-full transition-colors flex items-center justify-center shadow-lg"
+                                title="Ajustar encuadre"
+                              >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                                </svg>
                               </button>
                               <button
                                 type="button"
                                 onClick={() => handleDeleteImageClick(idx)}
-                                className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs rounded-md transition-colors flex items-center gap-1"
+                                className="w-10 h-10 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors flex items-center justify-center shadow-lg"
+                                title="Eliminar imagen"
                               >
-                                <Trash2 className="w-3 h-3" />
-                                Eliminar
+                                <Trash2 className="w-5 h-5" />
                               </button>
                             </div>
                           )}
@@ -617,7 +650,7 @@ const AdminPanel = () => {
                               <button
                                 type="button"
                                 onClick={() => unmarkImageForDeletion(idx)}
-                                className="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-xs rounded-md"
+                                className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm rounded-md shadow-lg"
                               >
                                 Deshacer
                               </button>
@@ -635,14 +668,14 @@ const AdminPanel = () => {
                             alt={`Nueva ${idx + 1}`}
                             className="w-full h-full object-cover"
                           />
-                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <button
                               type="button"
                               onClick={() => removeNewImage(idx)}
-                              className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs rounded-md flex items-center gap-1"
+                              className="w-10 h-10 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors flex items-center justify-center shadow-lg"
+                              title="Eliminar"
                             >
-                              <Trash2 className="w-3 h-3" />
-                              Eliminar
+                              <Trash2 className="w-5 h-5" />
                             </button>
                           </div>
                         </div>
@@ -754,20 +787,20 @@ const AdminPanel = () => {
       {/* Modal para Ver Imagen */}
       {viewingImage && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-fadeIn"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-sm animate-fadeIn"
           onClick={() => setViewingImage(null)}
         >
-          <div className="relative max-w-4xl max-h-[90vh] w-full">
+          <div className="relative w-full h-full max-w-6xl max-h-[95vh] flex items-center justify-center">
             <button
               onClick={() => setViewingImage(null)}
-              className="absolute -top-12 right-0 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
+              className="absolute top-4 right-4 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors z-10"
             >
               <X className="w-6 h-6 text-white" />
             </button>
             <img
               src={getImageUrl(viewingImage)}
               alt="Vista previa"
-              className="w-full h-full object-contain rounded-lg"
+              className="max-w-full max-h-full object-contain rounded-lg"
               onClick={(e) => e.stopPropagation()}
             />
           </div>
@@ -802,6 +835,158 @@ const AdminPanel = () => {
                 className="flex-1 py-2 px-4 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all text-sm"
               >
                 Sí, eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Ajuste de Imagen */}
+      {adjustingImage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white dark:bg-[#2d2640] rounded-2xl w-full max-w-3xl shadow-2xl animate-slideIn overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-white/10">
+              <h3 className="font-semibold text-gray-800 dark:text-white">Ajustar Encuadre de Imagen</h3>
+              <button
+                onClick={() => setAdjustingImage(null)}
+                className="w-8 h-8 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full flex items-center justify-center transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-600 dark:text-white" />
+              </button>
+            </div>
+
+            {/* Preview Container */}
+            <div className="p-6">
+              <p className="text-sm text-gray-600 dark:text-white/70 mb-4">
+                Selecciona cómo quieres que se vea la imagen en las tarjetas del catálogo:
+              </p>
+              
+              {/* Preview Box */}
+              <div className="relative w-full aspect-square bg-gray-100 dark:bg-[#1a1625] rounded-xl overflow-hidden mb-4 border-2 border-gray-300 dark:border-white/20">
+                <img
+                  src={getImageUrl(adjustingImage.image)}
+                  alt="Preview"
+                  className="w-full h-full object-cover transition-all duration-300"
+                  style={{
+                    objectPosition: imagePositions[adjustingImage.index] || 'center'
+                  }}
+                />
+              </div>
+
+              {/* Position Controls */}
+              <div className="space-y-3">
+                <p className="text-xs font-medium text-gray-700 dark:text-white/80 uppercase tracking-wider">
+                  Posición del encuadre
+                </p>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    onClick={() => handlePositionChange('top left')}
+                    className={`py-2 px-3 rounded-lg border text-sm transition-all ${
+                      imagePositions[adjustingImage.index] === 'top left'
+                        ? 'bg-[#C9A96E] text-white border-[#C9A96E]'
+                        : 'border-gray-300 dark:border-white/20 text-gray-700 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-white/5'
+                    }`}
+                  >
+                    Superior Izq
+                  </button>
+                  <button
+                    onClick={() => handlePositionChange('top center')}
+                    className={`py-2 px-3 rounded-lg border text-sm transition-all ${
+                      imagePositions[adjustingImage.index] === 'top center'
+                        ? 'bg-[#C9A96E] text-white border-[#C9A96E]'
+                        : 'border-gray-300 dark:border-white/20 text-gray-700 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-white/5'
+                    }`}
+                  >
+                    Superior Centro
+                  </button>
+                  <button
+                    onClick={() => handlePositionChange('top right')}
+                    className={`py-2 px-3 rounded-lg border text-sm transition-all ${
+                      imagePositions[adjustingImage.index] === 'top right'
+                        ? 'bg-[#C9A96E] text-white border-[#C9A96E]'
+                        : 'border-gray-300 dark:border-white/20 text-gray-700 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-white/5'
+                    }`}
+                  >
+                    Superior Der
+                  </button>
+                  <button
+                    onClick={() => handlePositionChange('center left')}
+                    className={`py-2 px-3 rounded-lg border text-sm transition-all ${
+                      imagePositions[adjustingImage.index] === 'center left'
+                        ? 'bg-[#C9A96E] text-white border-[#C9A96E]'
+                        : 'border-gray-300 dark:border-white/20 text-gray-700 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-white/5'
+                    }`}
+                  >
+                    Centro Izq
+                  </button>
+                  <button
+                    onClick={() => handlePositionChange('center')}
+                    className={`py-2 px-3 rounded-lg border text-sm transition-all ${
+                      !imagePositions[adjustingImage.index] || imagePositions[adjustingImage.index] === 'center'
+                        ? 'bg-[#C9A96E] text-white border-[#C9A96E]'
+                        : 'border-gray-300 dark:border-white/20 text-gray-700 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-white/5'
+                    }`}
+                  >
+                    Centro
+                  </button>
+                  <button
+                    onClick={() => handlePositionChange('center right')}
+                    className={`py-2 px-3 rounded-lg border text-sm transition-all ${
+                      imagePositions[adjustingImage.index] === 'center right'
+                        ? 'bg-[#C9A96E] text-white border-[#C9A96E]'
+                        : 'border-gray-300 dark:border-white/20 text-gray-700 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-white/5'
+                    }`}
+                  >
+                    Centro Der
+                  </button>
+                  <button
+                    onClick={() => handlePositionChange('bottom left')}
+                    className={`py-2 px-3 rounded-lg border text-sm transition-all ${
+                      imagePositions[adjustingImage.index] === 'bottom left'
+                        ? 'bg-[#C9A96E] text-white border-[#C9A96E]'
+                        : 'border-gray-300 dark:border-white/20 text-gray-700 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-white/5'
+                    }`}
+                  >
+                    Inferior Izq
+                  </button>
+                  <button
+                    onClick={() => handlePositionChange('bottom center')}
+                    className={`py-2 px-3 rounded-lg border text-sm transition-all ${
+                      imagePositions[adjustingImage.index] === 'bottom center'
+                        ? 'bg-[#C9A96E] text-white border-[#C9A96E]'
+                        : 'border-gray-300 dark:border-white/20 text-gray-700 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-white/5'
+                    }`}
+                  >
+                    Inferior Centro
+                  </button>
+                  <button
+                    onClick={() => handlePositionChange('bottom right')}
+                    className={`py-2 px-3 rounded-lg border text-sm transition-all ${
+                      imagePositions[adjustingImage.index] === 'bottom right'
+                        ? 'bg-[#C9A96E] text-white border-[#C9A96E]'
+                        : 'border-gray-300 dark:border-white/20 text-gray-700 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-white/5'
+                    }`}
+                  >
+                    Inferior Der
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer Actions */}
+            <div className="flex gap-2 p-4 border-t border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#1a1625]">
+              <button
+                onClick={() => setAdjustingImage(null)}
+                className="flex-1 py-2.5 px-4 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-white/80 rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all text-sm font-medium"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={saveImagePosition}
+                className="flex-1 py-2.5 px-4 bg-[#C9A96E] hover:bg-[#B8986A] text-white rounded-xl transition-all text-sm font-medium shadow-md"
+              >
+                Guardar Ajuste
               </button>
             </div>
           </div>

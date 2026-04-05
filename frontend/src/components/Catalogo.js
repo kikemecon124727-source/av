@@ -288,10 +288,10 @@ const Catalogo = () => {
                   className="group cursor-pointer animate-fadeIn"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  {/* Product Card - Diseño original elegante */}
+                  {/* Product Card - Diseño con aspect-square */}
                   <div className="bg-white dark:bg-[#1a1520] rounded-xl overflow-hidden shadow-sm hover:shadow-2xl dark:shadow-black/30 transition-all duration-500 border border-gray-100 dark:border-[#2d1f3f]">
-                    {/* Product Image */}
-                    <div className="relative w-full h-48 sm:h-56 lg:h-64 overflow-hidden bg-gray-50 dark:bg-[#0a0a0a]">
+                    {/* Product Image - Aspect ratio cuadrado */}
+                    <div className="relative w-full aspect-square overflow-hidden bg-gray-50 dark:bg-[#0a0a0a]">
                       {product.imagenes && product.imagenes.length > 0 ? (
                         <img
                           src={getImageUrl(product.imagenes[0])}
