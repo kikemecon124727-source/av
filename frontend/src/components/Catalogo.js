@@ -383,7 +383,10 @@ const Catalogo = () => {
                     <img
                       src={getImageUrl(selectedProduct.imagenes[currentImageIndex])}
                       alt={`${selectedProduct.nombre} - ${currentImageIndex + 1}`}
-                      className="w-full h-full object-contain p-4"
+                      className="w-full h-full object-cover"
+                      style={{
+                        objectPosition: selectedProduct.imagenes[currentImageIndex].position || 'center'
+                      }}
                     />
 
                     {selectedProduct.imagenes.length > 1 && (
