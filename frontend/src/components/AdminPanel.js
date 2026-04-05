@@ -625,33 +625,33 @@ const AdminPanel = () => {
                             }`}
                           />
                           
-                          {/* Overlay con botones EN TRIÁNGULO - Solo si NO está marcada para eliminar */}
+                          {/* Overlay con botones EN TRIÁNGULO - MÁS PEQUEÑOS */}
                           {!imagesToDelete.includes(idx) && (
                             <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
                               {/* Contenedor de triángulo */}
-                              <div className="flex flex-col items-center gap-3">
+                              <div className="flex flex-col items-center gap-2">
                                 {/* Fila superior: 2 botones */}
-                                <div className="flex gap-3">
+                                <div className="flex gap-2">
                                   <button
                                     type="button"
                                     onClick={() => handleViewImage(image)}
-                                    className="w-14 h-14 bg-white hover:bg-gray-100 text-gray-800 rounded-full transition-all flex items-center justify-center shadow-xl hover:scale-110 active:scale-95"
+                                    className="w-10 h-10 bg-white hover:bg-gray-100 text-gray-800 rounded-full transition-all flex items-center justify-center shadow-lg hover:scale-110 active:scale-95"
                                     title="Ver imagen"
                                   >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                     </svg>
                                   </button>
                                   
                                   <button
                                     type="button"
                                     onClick={() => handleAdjustImage(image, idx)}
-                                    className="w-14 h-14 bg-purple-500 hover:bg-purple-600 text-white rounded-full transition-all flex items-center justify-center shadow-xl hover:scale-110 active:scale-95"
+                                    className="w-10 h-10 bg-purple-500 hover:bg-purple-600 text-white rounded-full transition-all flex items-center justify-center shadow-lg hover:scale-110 active:scale-95"
                                     title="Ajustar encuadre"
                                   >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                                     </svg>
                                   </button>
                                 </div>
@@ -660,10 +660,10 @@ const AdminPanel = () => {
                                 <button
                                   type="button"
                                   onClick={() => handleDeleteImageClick(idx)}
-                                  className="w-14 h-14 bg-red-500 hover:bg-red-600 text-white rounded-full transition-all flex items-center justify-center shadow-xl hover:scale-110 active:scale-95"
+                                  className="w-10 h-10 bg-red-500 hover:bg-red-600 text-white rounded-full transition-all flex items-center justify-center shadow-lg hover:scale-110 active:scale-95"
                                   title="Eliminar imagen"
                                 >
-                                  <Trash2 className="w-6 h-6" />
+                                  <Trash2 className="w-4 h-4" strokeWidth={2.5} />
                                 </button>
                               </div>
                             </div>
@@ -698,10 +698,10 @@ const AdminPanel = () => {
                             <button
                               type="button"
                               onClick={() => removeNewImage(idx)}
-                              className="w-14 h-14 bg-red-500 hover:bg-red-600 text-white rounded-full transition-all flex items-center justify-center shadow-xl hover:scale-110 active:scale-95"
+                              className="w-10 h-10 bg-red-500 hover:bg-red-600 text-white rounded-full transition-all flex items-center justify-center shadow-lg hover:scale-110 active:scale-95"
                               title="Eliminar"
                             >
-                              <Trash2 className="w-6 h-6" />
+                              <Trash2 className="w-4 h-4" strokeWidth={2.5} />
                             </button>
                           </div>
                         </div>

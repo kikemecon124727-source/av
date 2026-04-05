@@ -300,6 +300,7 @@ const Catalogo = () => {
                           style={{
                             objectPosition: product.imagenes[0].position || 'center'
                           }}
+                          loading="lazy"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-[#8b7a9f] text-xs sm:text-sm">
