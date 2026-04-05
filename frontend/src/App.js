@@ -1,12 +1,25 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./App.css";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "./components/ThemeToggle";
 import { ToastProvider } from "./components/Toast";
 import Catalogo from "./components/Catalogo";
 import AdminPanel from "./components/AdminPanel";
 import Login from "./components/Login";
+
+// Hook para cambiar el título según la ruta
+function useDocumentTitle() {
+  const location = useLocation();
+  
+  useEffect(() => {
+    if (location.pathname === '/admin') {
+      document.title = 'Administrador | Jessica Ale Suarez';
+    } else {
+      document.title = 'Catálogo | Jessica Ale Suarez';
+    }
+  }, [location]);
+}
 
 // Componente de ruta protegida
 const ProtectedRoute = ({ children }) => {
@@ -28,6 +41,9 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function AppRoutes() {
+  // Actualizar título según la ruta
+  useDocumentTitle();
+  
   return (
     <Routes>
       {/* Catálogo público - Ruta principal */}
