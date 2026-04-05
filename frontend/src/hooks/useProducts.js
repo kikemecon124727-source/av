@@ -77,6 +77,13 @@ export const useProducts = () => {
     }
   };
 
+  // Calcular tamaño total de un documento en bytes (aproximado)
+  const calculateDocumentSize = (data) => {
+    // Convertir el objeto a JSON y calcular su tamaño en bytes
+    const jsonString = JSON.stringify(data);
+    return new Blob([jsonString]).size;
+  };
+
   // Crear producto
   const createProduct = async (productData, imageFiles) => {
     try {
@@ -89,23 +96,49 @@ export const useProducts = () => {
         processedImages.push(imageData);
       }
 
-      // Crear documento
-      const docRef = await addDoc(collection(db, PRODUCTS_COLLECTION), {
+      // Crear documento de prueba para validar tamaño
+      const documentData = {
         nombre: productData.nombre,
         descripcion: productData.descripcion || '',
         colores: productData.colores || [],
         imagenes: processedImages,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
-      });
+      };
+
+      // Validar que el documento no exceda ~950KB (límite de Firestore es 1MB)
+      const documentSize = calculateDocumentSize(documentData);
+      const maxSizeBytes = 950 * 1024; // 950KB en bytes
+      
+      if (documentSize > maxSizeBytes) {
+        const sizeInKB = (documentSize / 1024).toFixed(0);
+        const errorMsg = `El producto con todas sus imágenes pesa ${sizeInKB}KB. El límite es 950KB. Por favor, reduce el número de imágenes o su calidad.`;
+        
+        setLoading(false);
+        return { 
+          success: false, 
+          error: errorMsg,
+          isSizeError: true 
+        };
+      }
+
+      // Crear documento en Firestore
+      const docRef = await addDoc(collection(db, PRODUCTS_COLLECTION), documentData);
 
       setLoading(false);
       return { success: true, id: docRef.id };
     } catch (err) {
       console.error('Error creating product:', err);
-      setError(err.message);
+      
+      // Detectar error específico de Firestore por límite de tamaño
+      let errorMessage = err.message;
+      if (err.code === 'resource-exhausted' || err.message.includes('exceeded')) {
+        errorMessage = '⚠️ Las imágenes son demasiado pesadas. Firestore tiene un límite de 1MB por producto. Reduce el número de imágenes o intenta con fotos más pequeñas.';
+      }
+      
+      setError(errorMessage);
       setLoading(false);
-      return { success: false, error: err.message };
+      return { success: false, error: errorMessage };
     }
   };
 
@@ -122,36 +155,58 @@ export const useProducts = () => {
       }
 
       // Filtrar imágenes existentes (quitar las eliminadas)
-      // Las imágenes a eliminar vienen como índices o nombres
       let existingImages = productData.imagenes || [];
       if (imagesToDelete.length > 0) {
         existingImages = existingImages.filter((img, idx) => {
-          // Si imagesToDelete contiene índices numéricos
           if (typeof imagesToDelete[0] === 'number') {
             return !imagesToDelete.includes(idx);
           }
-          // Si contiene nombres o paths
           const imgName = img.name || img.path || `img_${idx}`;
           return !imagesToDelete.includes(imgName);
         });
       }
 
-      // Actualizar documento
-      await updateDoc(doc(db, PRODUCTS_COLLECTION, productId), {
+      // Crear documento de prueba para validar tamaño
+      const updatedData = {
         nombre: productData.nombre,
         descripcion: productData.descripcion || '',
         colores: productData.colores || [],
         imagenes: [...existingImages, ...newProcessedImages],
         updatedAt: serverTimestamp()
-      });
+      };
+
+      // Validar tamaño del documento
+      const documentSize = calculateDocumentSize(updatedData);
+      const maxSizeBytes = 950 * 1024;
+      
+      if (documentSize > maxSizeBytes) {
+        const sizeInKB = (documentSize / 1024).toFixed(0);
+        const errorMsg = `El producto actualizado pesa ${sizeInKB}KB. El límite es 950KB. Elimina algunas imágenes o reduce su número.`;
+        
+        setLoading(false);
+        return { 
+          success: false, 
+          error: errorMsg,
+          isSizeError: true 
+        };
+      }
+
+      // Actualizar documento
+      await updateDoc(doc(db, PRODUCTS_COLLECTION, productId), updatedData);
 
       setLoading(false);
       return { success: true };
     } catch (err) {
       console.error('Error updating product:', err);
-      setError(err.message);
+      
+      let errorMessage = err.message;
+      if (err.code === 'resource-exhausted' || err.message.includes('exceeded')) {
+        errorMessage = '⚠️ Las imágenes son demasiado pesadas. Firestore tiene un límite de 1MB por producto. Reduce el número de imágenes.';
+      }
+      
+      setError(errorMessage);
       setLoading(false);
-      return { success: false, error: err.message };
+      return { success: false, error: errorMessage };
     }
   };
 

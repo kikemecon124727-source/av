@@ -356,103 +356,115 @@ const Catalogo = () => {
         </div>
       </footer>
 
-      {/* Product Modal */}
+      {/* Product Drawer - Deslizante desde la derecha (Desktop) y Pantalla completa (Mobile) */}
       {selectedProduct && (
-        <div 
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm animate-fadeIn overflow-y-auto"
-          onClick={closeProductModal}
-        >
-          <div className="min-h-full flex items-start sm:items-center justify-center p-0 sm:p-4">
-            <div 
-              className="bg-white dark:bg-[#1a1520] w-full sm:max-w-4xl sm:rounded-2xl overflow-hidden shadow-2xl animate-slideIn"
-              onClick={(e) => e.stopPropagation()}
+        <>
+          {/* Backdrop oscuro */}
+          <div 
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm animate-fadeIn"
+            onClick={closeProductModal}
+          />
+          
+          {/* Drawer Container */}
+          <div 
+            className="fixed inset-y-0 right-0 z-50 w-full md:w-[500px] lg:w-[600px] bg-white dark:bg-[#1a1520] shadow-2xl transform transition-transform duration-300 ease-out overflow-y-auto"
+            style={{ animation: 'slideInRight 0.3s ease-out' }}
+          >
+            {/* Botón de cierre FIJO en la parte superior */}
+            <button
+              onClick={closeProductModal}
+              className="fixed top-4 right-4 z-[60] w-10 h-10 bg-white/95 dark:bg-[#0a0a0a]/95 rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform border border-gray-200 dark:border-[#2d1f3f]"
             >
-              <button
-                onClick={closeProductModal}
-                className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 dark:bg-[#0a0a0a]/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform"
-              >
-                <X className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-white" />
-              </button>
+              <X className="w-5 h-5 text-gray-600 dark:text-white" />
+            </button>
 
-              <div className="flex flex-col sm:flex-row">
-                {/* Image Carousel */}
-                <div className="relative w-full sm:flex-1 aspect-square sm:aspect-auto sm:min-h-[450px] bg-gray-50 dark:bg-[#0a0a0a]">
-                  {selectedProduct.imagenes && selectedProduct.imagenes.length > 0 ? (
-                    <>
-                      <img
-                        src={getImageUrl(selectedProduct.imagenes[currentImageIndex])}
-                        alt={`${selectedProduct.nombre} - ${currentImageIndex + 1}`}
-                        className="w-full h-full object-contain"
-                      />
+            {/* Contenido del drawer */}
+            <div className="flex flex-col h-full">
+              {/* Image Carousel - Ocupa la mitad superior */}
+              <div className="relative w-full h-[45vh] md:h-[50vh] bg-gray-50 dark:bg-[#0a0a0a] flex-shrink-0">
+                {selectedProduct.imagenes && selectedProduct.imagenes.length > 0 ? (
+                  <>
+                    <img
+                      src={getImageUrl(selectedProduct.imagenes[currentImageIndex])}
+                      alt={`${selectedProduct.nombre} - ${currentImageIndex + 1}`}
+                      className="w-full h-full object-contain p-4"
+                    />
 
-                      {selectedProduct.imagenes.length > 1 && (
-                        <>
-                          <button
-                            onClick={prevImage}
-                            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 dark:bg-[#2d1f3f]/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
-                          >
-                            <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-white rotate-90" />
-                          </button>
-                          <button
-                            onClick={nextImage}
-                            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 dark:bg-[#2d1f3f]/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
-                          >
-                            <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-white -rotate-90" />
-                          </button>
+                    {selectedProduct.imagenes.length > 1 && (
+                      <>
+                        <button
+                          onClick={prevImage}
+                          className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 dark:bg-[#2d1f3f]/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+                        >
+                          <ChevronDown className="w-5 h-5 text-gray-600 dark:text-white rotate-90" />
+                        </button>
+                        <button
+                          onClick={nextImage}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 dark:bg-[#2d1f3f]/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+                        >
+                          <ChevronDown className="w-5 h-5 text-gray-600 dark:text-white -rotate-90" />
+                        </button>
 
-                          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
-                            {selectedProduct.imagenes.map((_, idx) => (
-                              <button
-                                key={idx}
-                                onClick={() => setCurrentImageIndex(idx)}
-                                className={`h-1.5 rounded-full transition-all ${idx === currentImageIndex ? 'bg-[#C9A96E] w-5' : 'bg-gray-400/50 w-1.5 hover:bg-gray-400'}`}
-                              />
-                            ))}
-                          </div>
-                        </>
-                      )}
-                    </>
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-[#8b7a9f]">
-                      Sin imagen
-                    </div>
-                  )}
-                </div>
+                        {/* Indicadores de imagen */}
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
+                          {selectedProduct.imagenes.map((_, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => setCurrentImageIndex(idx)}
+                              className={`h-1.5 rounded-full transition-all ${
+                                idx === currentImageIndex 
+                                  ? 'bg-[#C9A96E] w-6' 
+                                  : 'bg-gray-400/50 w-1.5 hover:bg-gray-400'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-[#8b7a9f]">
+                    Sin imagen
+                  </div>
+                )}
+              </div>
 
-                {/* Product Details */}
-                <div className="p-5 sm:p-6 sm:w-80 lg:w-96 flex flex-col">
-                  <h2 className="text-xl sm:text-2xl font-medium text-gray-800 dark:text-white mb-3">
-                    {selectedProduct.nombre}
-                  </h2>
+              {/* Product Details - Scrollable */}
+              <div className="flex-1 p-6 overflow-y-auto">
+                <h2 className="text-2xl md:text-3xl font-medium text-gray-800 dark:text-white mb-4 pr-12">
+                  {selectedProduct.nombre}
+                </h2>
 
-                  {selectedProduct.descripcion && (
-                    <p className="text-gray-600 dark:text-[#c4b5d4] text-sm sm:text-base mb-5 leading-relaxed">
-                      {selectedProduct.descripcion}
+                {selectedProduct.descripcion && (
+                  <p className="text-gray-600 dark:text-[#c4b5d4] text-base leading-relaxed mb-6">
+                    {selectedProduct.descripcion}
+                  </p>
+                )}
+
+                {/* Colores disponibles */}
+                {selectedProduct.colores && selectedProduct.colores.length > 0 && (
+                  <div className="mb-6">
+                    <p className="text-xs uppercase tracking-wider text-gray-400 dark:text-[#8b7a9f] mb-3">
+                      Colores disponibles
                     </p>
-                  )}
-
-                  {/* Show ALL colors in modal too */}
-                  {selectedProduct.colores && selectedProduct.colores.length > 0 && (
-                    <div className="mb-5">
-                      <p className="text-[11px] uppercase tracking-wider text-gray-400 dark:text-[#8b7a9f] mb-3">Colores disponibles</p>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedProduct.colores.map(c => renderColorBadge(c))}
-                      </div>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedProduct.colores.map(c => renderColorBadge(c))}
                     </div>
-                  )}
+                  </div>
+                )}
 
-                  <button
-                    onClick={handleWhatsApp}
-                    className="mt-auto w-full py-3.5 bg-[#25D366] hover:bg-[#20BD5A] text-white text-sm font-medium rounded-xl transition-all flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
-                  >
-                    <MessageCircle className="w-5 h-5" />
-                    Consultar por WhatsApp
-                  </button>
-                </div>
+                {/* Botón de WhatsApp */}
+                <button
+                  onClick={handleWhatsApp}
+                  className="w-full py-4 bg-[#25D366] hover:bg-[#20BD5A] text-white text-base font-medium rounded-xl transition-all flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] shadow-lg mt-8"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  Consultar por WhatsApp
+                </button>
               </div>
             </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* WhatsApp Floating Button */}

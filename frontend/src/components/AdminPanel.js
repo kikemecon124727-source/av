@@ -235,22 +235,37 @@ const AdminPanel = () => {
 
       const remainingExistingImages = existingImages.filter((_, idx) => !imagesToDelete.includes(idx));
 
+      let result;
+      
       if (editingProduct) {
-        await updateProduct(
+        result = await updateProduct(
           editingProduct.id,
           { ...formData, colores: coloresForFirebase, imagenes: remainingExistingImages },
           newImages,
           []
         );
-        toast.success('Producto actualizado correctamente');
       } else {
-        await createProduct({ ...formData, colores: coloresForFirebase }, newImages);
-        toast.success('Producto creado correctamente');
+        result = await createProduct({ ...formData, colores: coloresForFirebase }, newImages);
       }
+
+      // Verificar si hubo error
+      if (!result.success) {
+        // Si es un error de tamaño, mostrar mensaje específico
+        if (result.isSizeError) {
+          toast.error(result.error, { duration: 8000 });
+        } else {
+          toast.error(result.error || 'Error al guardar el producto');
+        }
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Éxito
+      toast.success(editingProduct ? 'Producto actualizado correctamente' : 'Producto creado correctamente');
       closeModal();
     } catch (error) {
       console.error('Error saving product:', error);
-      toast.error('Error al guardar el producto');
+      toast.error('Error inesperado al guardar el producto');
     } finally {
       setIsSubmitting(false);
     }
