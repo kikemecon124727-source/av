@@ -288,35 +288,53 @@ const Catalogo = () => {
                   className="group cursor-pointer animate-fadeIn"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  {/* Product Card with white background */}
-                  <div className="bg-white dark:bg-[#1a1520] rounded-xl sm:rounded-2xl overflow-hidden shadow-sm hover:shadow-lg dark:shadow-black/20 transition-all duration-300">
-                    {/* Product Image */}
-                    <div className="aspect-[3/4] overflow-hidden bg-gray-50 dark:bg-[#0a0a0a]">
+                  {/* Product Card - Diseño elegante con dimensiones fijas */}
+                  <div className="bg-white dark:bg-[#1a1520] rounded-none overflow-hidden shadow-sm hover:shadow-2xl dark:shadow-black/30 transition-all duration-500 border border-gray-100 dark:border-[#2d1f3f]">
+                    {/* Product Image - Aspect ratio fijo 3:4 */}
+                    <div className="relative w-full aspect-[3/4] overflow-hidden bg-gray-50 dark:bg-[#0a0a0a]">
                       {product.imagenes && product.imagenes.length > 0 ? (
                         <img
                           src={getImageUrl(product.imagenes[0])}
                           alt={product.nombre}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                          className="absolute inset-0 w-full h-full object-contain p-3 group-hover:scale-105 transition-transform duration-700 ease-out"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-[#8b7a9f] text-xs sm:text-sm">
+                        <div className="absolute inset-0 flex items-center justify-center text-gray-400 dark:text-[#8b7a9f] text-xs sm:text-sm">
                           Sin imagen
                         </div>
                       )}
+                      
+                      {/* Overlay sutil al hover */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                     </div>
 
                     {/* Product Info */}
-                    <div className="p-3 sm:p-4 space-y-2 sm:space-y-3">
-                      <h4 className="text-sm sm:text-base font-medium text-gray-800 dark:text-white truncate group-hover:text-[#C9A96E] transition-colors duration-300">
+                    <div className="p-3 sm:p-4 space-y-2 border-t border-gray-100 dark:border-[#2d1f3f]">
+                      {/* Nombre del producto */}
+                      <h4 className="text-sm sm:text-base font-medium text-gray-800 dark:text-white line-clamp-2 min-h-[2.5rem] group-hover:text-[#C9A96E] transition-colors duration-300">
                         {product.nombre}
                       </h4>
                       
+                      {/* Precio si existe */}
+                      {product.precio && (
+                        <p className="text-base sm:text-lg font-semibold text-[#C9A96E]">
+                          ${product.precio}
+                        </p>
+                      )}
+                      
                       {/* Show ALL colors */}
                       {product.colores && product.colores.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5">
+                        <div className="flex flex-wrap gap-1 sm:gap-1.5">
                           {product.colores.map(c => renderColorBadge(c, 'small'))}
                         </div>
                       )}
+
+                      {/* Botón de acción */}
+                      <div className="pt-2">
+                        <div className="text-xs text-gray-500 dark:text-[#9d8fb3] text-center py-1.5 border-t border-gray-100 dark:border-[#2d1f3f] group-hover:text-[#C9A96E] transition-colors">
+                          Ver detalles →
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

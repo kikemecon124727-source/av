@@ -56,11 +56,11 @@ export const useProducts = () => {
   // Procesar imagen: comprimir y convertir a base64
   const processImage = async (file) => {
     try {
-      // Comprimir y convertir a WebP con MEJOR CALIDAD (80%)
+      // Comprimir y convertir a WebP OPTIMIZADO para 10 fotos
       const compressedFile = await compressAndConvertToWebP(file, {
-        maxSizeMB: 0.5, // Aumentado a 500KB para mejor calidad
-        maxWidthOrHeight: 1200, // Resolución más alta
-        initialQuality: 0.8, // 80% de calidad
+        maxSizeMB: 0.09, // Máximo 90KB por imagen (10 imágenes = ~900KB total)
+        maxWidthOrHeight: 1024, // Resolución óptima
+        initialQuality: 0.85, // 85% de calidad (buen balance)
       });
       
       // Convertir a base64
