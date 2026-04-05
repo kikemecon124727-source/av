@@ -357,32 +357,32 @@ const Catalogo = () => {
               </button>
 
               <div className="flex flex-col sm:flex-row">
-                {/* Image Carousel con Zoom Tipo Lupa */}
+                {/* Image Carousel */}
                 <div className="relative w-full sm:flex-1 aspect-square sm:aspect-auto sm:min-h-[450px] bg-gray-50 dark:bg-[#0a0a0a]">
                   {selectedProduct.imagenes && selectedProduct.imagenes.length > 0 ? (
                     <>
-                      <ImageMagnifier
+                      <img
                         src={getImageUrl(selectedProduct.imagenes[currentImageIndex])}
                         alt={`${selectedProduct.nombre} - ${currentImageIndex + 1}`}
-                        zoomLevel={2.5}
+                        className="w-full h-full object-contain"
                       />
 
                       {selectedProduct.imagenes.length > 1 && (
                         <>
                           <button
                             onClick={prevImage}
-                            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 dark:bg-[#2d1f3f]/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform z-10"
+                            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 dark:bg-[#2d1f3f]/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
                           >
                             <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-white rotate-90" />
                           </button>
                           <button
                             onClick={nextImage}
-                            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 dark:bg-[#2d1f3f]/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform z-10"
+                            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 dark:bg-[#2d1f3f]/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
                           >
                             <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-white -rotate-90" />
                           </button>
 
-                          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
                             {selectedProduct.imagenes.map((_, idx) => (
                               <button
                                 key={idx}
