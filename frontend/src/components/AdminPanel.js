@@ -247,8 +247,11 @@ const AdminPanel = () => {
       }
       setColorInput('');
     } catch (error) {
-      console.error('Error detecting color:', error);
-      // Fallback
+      // Silenciar error 404 (backend viejo sin endpoint)
+      if (error.response?.status !== 404) {
+        console.error('Error detecting color:', error);
+      }
+      // Fallback: agregar color manualmente
       const colorName = colorInput.trim();
       const exists = formData.colores.some(
         c => c.nombre.toLowerCase() === colorName.toLowerCase()
