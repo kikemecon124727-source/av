@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useProducts } from '../hooks/useProducts';
 import { ThemeToggle } from './ThemeToggle';
 import { useToastCustom } from './Toast';
-import { compressMultipleImages, createImagePreview, revokeImagePreview } from '../lib/imageCompressor';
+import { compressMultipleImages, createImagePreview, revokeImagePreview, compressWithReducedQuality } from '../lib/imageCompressor';
 import { getColorValue } from '../lib/colorDictionary';
 import axios from 'axios';
 import { 
@@ -49,6 +49,10 @@ const AdminPanel = () => {
   // Estado para ajuste de imagen
   const [adjustingImage, setAdjustingImage] = useState(null);
   const [imagePositions, setImagePositions] = useState({});
+  
+  // Estado para manejo de límite de tamaño
+  const [sizeError, setSizeError] = useState(null);
+  const [isReducingQuality, setIsReducingQuality] = useState(false);
 
   const filteredProducts = searchTerm ? searchProducts(searchTerm) : products;
 
@@ -290,6 +294,7 @@ const AdminPanel = () => {
     }
 
     setIsSubmitting(true);
+    setSizeError(null); // Limpiar error anterior
 
     try {
       const coloresForFirebase = formData.colores.map(c => ({
@@ -314,8 +319,9 @@ const AdminPanel = () => {
 
       // Verificar si hubo error
       if (!result.success) {
-        // Si es un error de tamaño, mostrar mensaje específico
+        // Si es un error de tamaño, guardar para mostrar botón de reducir calidad
         if (result.isSizeError) {
+          setSizeError(result.error);
           toast.error(result.error, { duration: 8000 });
         } else {
           toast.error(result.error || 'Error al guardar el producto');
@@ -332,6 +338,42 @@ const AdminPanel = () => {
       toast.error('Error inesperado al guardar el producto');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Nueva función para reducir calidad y reintentar
+  const handleReduceQualityAndRetry = async () => {
+    setIsReducingQuality(true);
+    setSizeError(null);
+
+    try {
+      toast.info('Reduciendo calidad de las imágenes...', { duration: 2000 });
+
+      // Recomprimir las imágenes con calidad reducida
+      const recompressedImages = [];
+      for (const img of newImages) {
+        const recompressed = await compressWithReducedQuality(img, 0.7); // 70% calidad
+        recompressedImages.push(recompressed);
+      }
+
+      // Actualizar las imágenes
+      setNewImages(recompressedImages);
+
+      // Regenerar previews
+      imagePreviews.forEach(preview => revokeImagePreview(preview.url));
+      const newPreviews = recompressedImages.map((file, index) => ({
+        id: `preview-${Date.now()}-${index}`,
+        url: createImagePreview(file),
+        name: file.name,
+      }));
+      setImagePreviews(newPreviews);
+
+      toast.success('Calidad reducida. Intenta guardar de nuevo.');
+    } catch (error) {
+      console.error('Error al reducir calidad:', error);
+      toast.error('Error al reducir calidad de las imágenes');
+    } finally {
+      setIsReducingQuality(false);
     }
   };
 
@@ -782,6 +824,41 @@ const AdminPanel = () => {
                     </>
                   )}
                 </button>
+
+                {/* Botón de reducir calidad (aparece si hay error de tamaño) */}
+                {sizeError && (
+                  <div className="bg-orange-50 dark:bg-orange-900/20 border-2 border-orange-300 dark:border-orange-700 rounded-xl p-4">
+                    <div className="flex items-start gap-3 mb-3">
+                      <AlertCircle className="w-5 h-5 text-orange-600 dark:text-orange-400 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-orange-800 dark:text-orange-300 mb-1">
+                          Imágenes muy pesadas
+                        </p>
+                        <p className="text-xs text-orange-700 dark:text-orange-400">
+                          {sizeError}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleReduceQualityAndRetry}
+                      disabled={isReducingQuality}
+                      className="w-full py-2.5 px-4 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {isReducingQuality ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Reduciendo calidad...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-4 h-4" />
+                          Reducir Calidad Automáticamente
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
               </form>
             </div>
           </div>

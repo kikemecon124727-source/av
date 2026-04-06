@@ -8,11 +8,11 @@ import imageCompression from 'browser-image-compression';
  */
 export const compressAndConvertToWebP = async (file, options = {}) => {
   const defaultOptions = {
-    maxSizeMB: 0.5,
-    maxWidthOrHeight: 1200,
+    maxSizeMB: 0.15,        // 150KB por imagen (más calidad)
+    maxWidthOrHeight: 1920,  // Resolución más alta
     useWebWorker: true,
     fileType: 'image/webp',
-    initialQuality: 0.8,  // 80% de calidad - mucho mejor
+    initialQuality: 0.92,    // 92% de calidad - excelente calidad
     alwaysKeepResolution: false,
   };
 
@@ -36,6 +36,20 @@ export const compressAndConvertToWebP = async (file, options = {}) => {
     console.error('Error al comprimir imagen:', error);
     throw error;
   }
+};
+
+/**
+ * Comprime imagen con calidad reducida para cumplir límites
+ * @param {File} file - Archivo de imagen original
+ * @param {number} quality - Calidad (0.5 - 0.9)
+ * @returns {Promise<File>} - Archivo WebP comprimido
+ */
+export const compressWithReducedQuality = async (file, quality = 0.7) => {
+  return compressAndConvertToWebP(file, {
+    maxSizeMB: 0.08,         // Más agresivo
+    maxWidthOrHeight: 1200,  // Resolución menor
+    initialQuality: quality,
+  });
 };
 
 /**
