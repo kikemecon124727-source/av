@@ -609,9 +609,9 @@ const AdminPanel = () => {
                     Imágenes * <span className="text-gray-400">(máx. {MAX_IMAGES})</span>
                   </label>
 
-                  {/* Existing + New Images Grid - MÓVIL: 1 columna gigante, botones pequeños */}
+                  {/* Existing + New Images Grid - MÓVIL: 2 columnas como en la foto */}
                   {(existingImages.length > 0 || imagePreviews.length > 0) && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-3">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-3">
                       {existingImages.map((image, idx) => (
                         <div
                           key={`existing-${idx}`}
