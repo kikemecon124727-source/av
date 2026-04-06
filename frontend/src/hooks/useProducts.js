@@ -12,6 +12,7 @@ import {
   serverTimestamp
 } from 'firebase/firestore';
 import { compressAndConvertToWebP } from '../lib/imageCompressor';
+import { uploadToImgBB } from '../lib/imgbbUploader';
 
 const PRODUCTS_COLLECTION = 'productos';
 
@@ -43,33 +44,22 @@ export const useProducts = () => {
     return () => unsubscribe();
   }, []);
 
-  // Convertir imagen a base64
-  const imageToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = error => reject(error);
-    });
-  };
-
-  // Procesar imagen: comprimir y convertir a base64
+  // Procesar y subir imagen a ImgBB
   const processImage = async (file) => {
     try {
-      // Comprimir y convertir a WebP OPTIMIZADO para 10 fotos
-      const compressedFile = await compressAndConvertToWebP(file, {
-        maxSizeMB: 0.09, // Máximo 90KB por imagen (10 imágenes = ~900KB total)
-        maxWidthOrHeight: 1024, // Resolución óptima
-        initialQuality: 0.85, // 85% de calidad (buen balance)
-      });
+      // Comprimir y convertir a WebP (1MB máximo, 95% calidad)
+      const compressedFile = await compressAndConvertToWebP(file);
       
-      // Convertir a base64
-      const base64 = await imageToBase64(compressedFile);
+      // Subir a ImgBB
+      const imgbbResult = await uploadToImgBB(compressedFile);
       
       return {
-        data: base64,
+        url: imgbbResult.display_url,     // URL principal para mostrar
+        thumb_url: imgbbResult.thumb_url, // Miniatura
+        delete_url: imgbbResult.delete_url, // Para eliminar si es necesario
         name: compressedFile.name,
-        size: compressedFile.size
+        size: imgbbResult.size,
+        position: 'center' // Posición por defecto
       };
     } catch (err) {
       console.error('Error processing image:', err);
@@ -77,68 +67,37 @@ export const useProducts = () => {
     }
   };
 
-  // Calcular tamaño total de un documento en bytes (aproximado)
-  const calculateDocumentSize = (data) => {
-    // Convertir el objeto a JSON y calcular su tamaño en bytes
-    const jsonString = JSON.stringify(data);
-    return new Blob([jsonString]).size;
-  };
-
   // Crear producto
   const createProduct = async (productData, imageFiles) => {
     try {
       setLoading(true);
       
-      // Procesar imágenes a base64
+      // Procesar y subir imágenes a ImgBB
       const processedImages = [];
       for (const file of imageFiles) {
         const imageData = await processImage(file);
         processedImages.push(imageData);
       }
 
-      // Crear documento de prueba para validar tamaño
+      // Crear documento en Firestore (solo URLs, mucho más ligero)
       const documentData = {
         nombre: productData.nombre,
         descripcion: productData.descripcion || '',
         colores: productData.colores || [],
-        imagenes: processedImages,
+        imagenes: processedImages, // Array de objetos con URLs
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
 
-      // Validar que el documento no exceda ~950KB (límite de Firestore es 1MB)
-      const documentSize = calculateDocumentSize(documentData);
-      const maxSizeBytes = 950 * 1024; // 950KB en bytes
-      
-      if (documentSize > maxSizeBytes) {
-        const sizeInKB = (documentSize / 1024).toFixed(0);
-        const errorMsg = `El producto con todas sus imágenes pesa ${sizeInKB}KB. El límite es 950KB. Por favor, reduce el número de imágenes o su calidad.`;
-        
-        setLoading(false);
-        return { 
-          success: false, 
-          error: errorMsg,
-          isSizeError: true 
-        };
-      }
-
-      // Crear documento en Firestore
       const docRef = await addDoc(collection(db, PRODUCTS_COLLECTION), documentData);
 
       setLoading(false);
       return { success: true, id: docRef.id };
     } catch (err) {
       console.error('Error creating product:', err);
-      
-      // Detectar error específico de Firestore por límite de tamaño
-      let errorMessage = err.message;
-      if (err.code === 'resource-exhausted' || err.message.includes('exceeded')) {
-        errorMessage = '⚠️ Las imágenes son demasiado pesadas. Firestore tiene un límite de 1MB por producto. Reduce el número de imágenes o intenta con fotos más pequeñas.';
-      }
-      
-      setError(errorMessage);
+      setError(err.message);
       setLoading(false);
-      return { success: false, error: errorMessage };
+      return { success: false, error: err.message };
     }
   };
 
@@ -147,7 +106,7 @@ export const useProducts = () => {
     try {
       setLoading(true);
 
-      // Procesar nuevas imágenes
+      // Procesar y subir nuevas imágenes a ImgBB
       const newProcessedImages = [];
       for (const file of newImageFiles) {
         const imageData = await processImage(file);
@@ -166,7 +125,7 @@ export const useProducts = () => {
         });
       }
 
-      // Crear documento de prueba para validar tamaño
+      // Actualizar documento
       const updatedData = {
         nombre: productData.nombre,
         descripcion: productData.descripcion || '',
@@ -175,38 +134,15 @@ export const useProducts = () => {
         updatedAt: serverTimestamp()
       };
 
-      // Validar tamaño del documento
-      const documentSize = calculateDocumentSize(updatedData);
-      const maxSizeBytes = 950 * 1024;
-      
-      if (documentSize > maxSizeBytes) {
-        const sizeInKB = (documentSize / 1024).toFixed(0);
-        const errorMsg = `El producto actualizado pesa ${sizeInKB}KB. El límite es 950KB. Elimina algunas imágenes o reduce su número.`;
-        
-        setLoading(false);
-        return { 
-          success: false, 
-          error: errorMsg,
-          isSizeError: true 
-        };
-      }
-
-      // Actualizar documento
       await updateDoc(doc(db, PRODUCTS_COLLECTION, productId), updatedData);
 
       setLoading(false);
       return { success: true };
     } catch (err) {
       console.error('Error updating product:', err);
-      
-      let errorMessage = err.message;
-      if (err.code === 'resource-exhausted' || err.message.includes('exceeded')) {
-        errorMessage = '⚠️ Las imágenes son demasiado pesadas. Firestore tiene un límite de 1MB por producto. Reduce el número de imágenes.';
-      }
-      
-      setError(errorMessage);
+      setError(err.message);
       setLoading(false);
-      return { success: false, error: errorMessage };
+      return { success: false, error: err.message };
     }
   };
 
