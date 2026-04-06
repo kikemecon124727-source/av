@@ -45,6 +45,19 @@ async def root():
     return {"message": "Backend API - Jessica Ale Suarez Catálogo"}
 
 
+@api_router.get("/health")
+async def health_check():
+    """
+    Endpoint simple para keep-alive y health checks.
+    UptimeRobot, cron-job.org o GitHub Actions pueden hacer ping aquí.
+    """
+    return {
+        "status": "ok",
+        "message": "Backend is alive",
+        "service": "Jessica Ale Suarez Catálogo"
+    }
+
+
 @api_router.post("/detect-color", response_model=ColorDetectionResponse)
 async def detect_color(request: ColorDetectionRequest):
     """
