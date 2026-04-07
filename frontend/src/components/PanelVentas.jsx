@@ -115,7 +115,7 @@ const PanelVentas = () => {
     const productoParaCarrito = {
       productoId: selectedProduct.id,
       nombre: selectedProduct.nombre,
-      imagen: selectedProduct.imagenes?.[0]?.url || null,
+      imagen: selectedProduct.imagenes?.[0]?.url || selectedProduct.imagenes?.[0] || null,
       colores: coloresArray,
       subtotal
     };
@@ -345,7 +345,7 @@ const PanelVentas = () => {
           </div>
         </div>
 
-        {/* Las 3 secciones */}
+        {/* Las 3 secciones - SIN OVERFLOW HIDDEN */}
         <div className="space-y-8">
           {/* SECCIÓN 1: PRODUCTOS */}
           <div className="bg-white dark:bg-[#2d2640] rounded-2xl p-6 shadow-lg">
@@ -353,40 +353,34 @@ const PanelVentas = () => {
               <Package className="w-5 h-5 text-[#C9A96E]" />
               <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Productos</h2>
             </div>
-            <div className="max-h-96 overflow-y-auto">
-              <SeccionProductos 
-                products={filterType === 'Productos' ? getFilteredData() : products}
-                loading={loadingProducts}
-                onProductClick={(product) => openProductModal(product, selectedCliente)}
-              />
-            </div>
+            <SeccionProductos 
+              products={filterType === 'Productos' ? getFilteredData() : products}
+              loading={loadingProducts}
+              onProductClick={(product) => openProductModal(product, selectedCliente)}
+            />
           </div>
 
           {/* SECCIÓN 2: CLIENTES */}
           <div className="bg-white dark:bg-[#2d2640] rounded-2xl p-6 shadow-lg">
-            <div className="max-h-96 overflow-y-auto">
-              <SeccionClientes 
-                clientes={filterType === 'Clientes' ? getFilteredData() : clientes}
-                loading={false}
-                onCrearCliente={handleCrearCliente}
-                onEditarCliente={handleEditarCliente}
-                onEliminarCliente={handleEliminarCliente}
-                onCrearPedido={handleCrearPedido}
-                onEditarPrecios={handleEditarPrecios}
-              />
-            </div>
+            <SeccionClientes 
+              clientes={filterType === 'Clientes' ? getFilteredData() : clientes}
+              loading={false}
+              onCrearCliente={handleCrearCliente}
+              onEditarCliente={handleEditarCliente}
+              onEliminarCliente={handleEliminarCliente}
+              onCrearPedido={handleCrearPedido}
+              onEditarPrecios={handleEditarPrecios}
+            />
           </div>
 
           {/* SECCIÓN 3: PEDIDOS */}
           <div className="bg-white dark:bg-[#2d2640] rounded-2xl p-6 shadow-lg">
-            <div className="max-h-96 overflow-y-auto">
-              <SeccionPedidos 
-                pedidos={filterType === 'Pedidos' ? getFilteredData() : pedidos}
-                pedidosConAdeudo={getPedidosConAdeudo()}
-                loading={false}
-                onVerPedido={handleVerPedido}
-              />
-            </div>
+            <SeccionPedidos 
+              pedidos={filterType === 'Pedidos' ? getFilteredData() : pedidos}
+              pedidosConAdeudo={getPedidosConAdeudo()}
+              loading={false}
+              onVerPedido={handleVerPedido}
+            />
           </div>
         </div>
       </main>

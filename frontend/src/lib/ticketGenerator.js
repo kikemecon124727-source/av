@@ -6,11 +6,18 @@ import { jsPDF } from 'jspdf';
  * @returns {jsPDF} - Objeto PDF
  */
 export const generateTicketPDF = (pedidoData) => {
+  // Calcular altura dinámica basada en número de productos
+  const baseHeight = 150; // Altura base del ticket
+  const heightPerProduct = 15; // Altura aproximada por producto (incluyendo colores)
+  const totalProducts = pedidoData.productos?.length || 0;
+  const totalColores = pedidoData.productos?.reduce((sum, p) => sum + (p.colores?.length || 0), 0) || 0;
+  const dynamicHeight = Math.max(200, baseHeight + (totalProducts * 10) + (totalColores * 4));
+
   // Crear PDF tamaño ticket térmico (80mm ancho, altura dinámica)
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
-    format: [80, 200] // Ancho fijo 80mm, altura inicial 200mm (se ajustará)
+    format: [80, dynamicHeight]
   });
 
   let yPos = 5; // Posición vertical inicial
@@ -18,7 +25,18 @@ export const generateTicketPDF = (pedidoData) => {
   const rightMargin = 75;
   const centerX = 40;
 
-  // ===== HEADER =====
+  // ===== HEADER CON LOGO =====
+  // Logo (si existe)
+  try {
+    const logoPath = '/logo-ticket.png';
+    const logoWidth = 20;
+    const logoHeight = 20;
+    doc.addImage(logoPath, 'PNG', centerX - logoWidth / 2, yPos, logoWidth, logoHeight);
+    yPos += logoHeight + 3;
+  } catch (error) {
+    console.warn('Logo no encontrado, usando texto:', error);
+  }
+
   // Título "JessicaAleSuarez"
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(16);
@@ -96,7 +114,8 @@ export const generateTicketPDF = (pedidoData) => {
     // Colores con indentación
     doc.setFont('helvetica', 'normal');
     producto.colores.forEach(colorData => {
-      const colorText = `  - ${colorData.color}`;
+      // Si no hay color, mostrar "N/A"
+      const colorText = `  - ${colorData.color || 'N/A'}`;
       doc.text(colorText, leftMargin + 2, yPos);
       doc.text(colorData.cantidad.toString(), 35, yPos, { align: 'center' });
       doc.text(`$${colorData.precio.toFixed(2)}`, 50, yPos, { align: 'center' });
@@ -108,21 +127,6 @@ export const generateTicketPDF = (pedidoData) => {
   });
 
   yPos += 3;
-
-  // ===== SECCIÓN PRODUCTOS (espaciador dinámico) =====
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
-  doc.text('PRODUCTOS', centerX, yPos, { align: 'center' });
-  yPos += 3.5;
-  
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7);
-  doc.text('EL LARGO DE ESTE ESPACIO', centerX, yPos, { align: 'center' });
-  yPos += 3;
-  doc.text('DEPENDE DE LA CANTIDAD', centerX, yPos, { align: 'center' });
-  yPos += 3;
-  doc.text('DE PRODUCTOS', centerX, yPos, { align: 'center' });
-  yPos += 5;
 
   // Línea separadora
   doc.line(leftMargin, yPos, rightMargin, yPos);

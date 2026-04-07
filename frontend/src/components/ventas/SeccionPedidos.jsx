@@ -17,6 +17,10 @@ const SeccionPedidos = ({
 
   const pedidosPagados = pedidos.filter(p => p.pagado && (!p.adeudo || p.adeudo === 0));
 
+  // Scroll condicional: solo si hay más de 10 pedidos
+  const shouldScrollPagados = pedidosPagados.length > 10;
+  const shouldScrollAdeudos = pedidosConAdeudo.length > 10;
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Pedidos Normales */}
@@ -26,19 +30,19 @@ const SeccionPedidos = ({
           PEDIDOS
         </h3>
         
-        <div className="bg-white dark:bg-[#2d2640] rounded-xl overflow-hidden">
+        <div className="bg-white dark:bg-[#1a1625] rounded-xl overflow-hidden border border-gray-200 dark:border-white/10">
           {pedidosPagados.length === 0 ? (
             <div className="text-center py-12">
               <FileText className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
               <p className="text-gray-500 dark:text-white/60 text-sm">No hay pedidos</p>
             </div>
           ) : (
-            <div className={`divide-y divide-gray-200 dark:divide-white/10 ${pedidosPagados.length > 10 ? 'max-h-96 overflow-y-auto' : ''}`}>
+            <div className={`divide-y divide-gray-200 dark:divide-white/10 ${shouldScrollPagados ? 'max-h-96 overflow-y-auto' : ''}`}>
               {pedidosPagados.map((pedido) => (
                 <button
                   key={pedido.id}
                   onClick={() => onVerPedido(pedido)}
-                  className="w-full px-4 py-3 hover:bg-gray-50 dark:hover:bg-[#1a1625] transition-colors text-left"
+                  className="w-full px-4 py-3 hover:bg-gray-50 dark:hover:bg-[#2d1f3f] transition-colors text-left"
                 >
                   <div className="flex justify-between items-center">
                     <div>
@@ -72,14 +76,14 @@ const SeccionPedidos = ({
           PEDIDOS CON ADEUDO
         </h3>
         
-        <div className="bg-white dark:bg-[#2d2640] rounded-xl overflow-hidden">
+        <div className="bg-white dark:bg-[#1a1625] rounded-xl overflow-hidden border border-gray-200 dark:border-white/10">
           {pedidosConAdeudo.length === 0 ? (
             <div className="text-center py-12">
               <DollarSign className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
               <p className="text-gray-500 dark:text-white/60 text-sm">No hay adeudos</p>
             </div>
           ) : (
-            <div className={`divide-y divide-gray-200 dark:divide-white/10 ${pedidosConAdeudo.length > 10 ? 'max-h-96 overflow-y-auto' : ''}`}>
+            <div className={`divide-y divide-gray-200 dark:divide-white/10 ${shouldScrollAdeudos ? 'max-h-96 overflow-y-auto' : ''}`}>
               {pedidosConAdeudo.map((pedido) => (
                 <button
                   key={pedido.id}
