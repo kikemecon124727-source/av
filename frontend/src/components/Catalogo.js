@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, X, ChevronDown, MessageCircle } from 'lucide-react';
 import { useProducts } from '../hooks/useProducts';
+import { useReferencias } from '../hooks/useReferencias';
 import { ThemeToggle } from './ThemeToggle';
 import { getColorValue } from '../lib/colorDictionary';
+import CarruselReferencias from './CarruselReferencias';
 
 const Catalogo = () => {
   const { products, loading, searchProducts } = useProducts();
+  const { referencias } = useReferencias();
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -471,6 +474,9 @@ const Catalogo = () => {
           </div>
         </>
       )}
+
+      {/* Carrusel de Referencias */}
+      <CarruselReferencias referencias={referencias} />
 
       {/* WhatsApp Floating Button */}
       <button

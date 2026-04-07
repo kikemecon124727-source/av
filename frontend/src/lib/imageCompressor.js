@@ -8,7 +8,7 @@ import imageCompression from 'browser-image-compression';
  */
 export const compressAndConvertToWebP = async (file, options = {}) => {
   const defaultOptions = {
-    maxSizeMB: 1,            // 1MB por imagen (mucho mejor)
+    maxSizeMB: 3,            // 3MB por imagen
     maxWidthOrHeight: 2048,  // Resolución 2K
     useWebWorker: true,
     fileType: 'image/webp',

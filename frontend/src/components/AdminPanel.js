@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useProducts } from '../hooks/useProducts';
+import { useReferencias } from '../hooks/useReferencias';
 import { ThemeToggle } from './ThemeToggle';
 import { useToastCustom } from './Toast';
 import { compressMultipleImages, createImagePreview, revokeImagePreview, compressWithReducedQuality } from '../lib/imageCompressor';
@@ -8,7 +9,7 @@ import { getColorValue } from '../lib/colorDictionary';
 import axios from 'axios';
 import { 
   LogOut, Plus, Trash2, Edit2, X, Upload, Search,
-  Image as ImageIcon, Loader2, Check, AlertCircle, Sparkles
+  Image as ImageIcon, Loader2, Check, AlertCircle, Sparkles, ChevronDown, Star, Eye
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -17,6 +18,7 @@ const MAX_IMAGES = 10;
 const AdminPanel = () => {
   const { logout, user } = useAuth();
   const { products, loading, createProduct, updateProduct, deleteProduct, searchProducts } = useProducts();
+  const { referencias, loading: loadingReferencias, createReferencia, updateReferencia, deleteReferencia } = useReferencias();
   const { toast } = useToastCustom();
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -53,6 +55,18 @@ const AdminPanel = () => {
   // Estado para manejo de límite de tamaño
   const [sizeError, setSizeError] = useState(null);
   const [isReducingQuality, setIsReducingQuality] = useState(false);
+
+  // Estados para menú desplegable y referencias
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isReferenciaModalOpen, setIsReferenciaModalOpen] = useState(false);
+  const [editingReferencia, setEditingReferencia] = useState(null);
+  const [referenciaFormData, setReferenciaFormData] = useState({
+    nombreCliente: '',
+    comentario: ''
+  });
+  const [referenciaImage, setReferenciaImage] = useState(null);
+  const [referenciaImagePreview, setReferenciaImagePreview] = useState(null);
+  const [deleteReferenciaConfirm, setDeleteReferenciaConfirm] = useState(null);
 
   const filteredProducts = searchTerm ? searchProducts(searchTerm) : products;
 
@@ -424,6 +438,110 @@ const AdminPanel = () => {
     );
   };
 
+  // ====== FUNCIONES PARA REFERENCIAS ======
+  const openReferenciaModal = () => {
+    setEditingReferencia(null);
+    setReferenciaFormData({ nombreCliente: '', comentario: '' });
+    setReferenciaImage(null);
+    setReferenciaImagePreview(null);
+    setIsReferenciaModalOpen(true);
+  };
+
+  const openEditReferenciaModal = (referencia) => {
+    setEditingReferencia(referencia);
+    setReferenciaFormData({
+      nombreCliente: referencia.nombreCliente || '',
+      comentario: referencia.comentario || ''
+    });
+    setReferenciaImage(null);
+    setReferenciaImagePreview(null);
+    setIsReferenciaModalOpen(true);
+  };
+
+  const closeReferenciaModal = () => {
+    if (referenciaImagePreview) {
+      revokeImagePreview(referenciaImagePreview);
+    }
+    setIsReferenciaModalOpen(false);
+    setEditingReferencia(null);
+    setReferenciaFormData({ nombreCliente: '', comentario: '' });
+    setReferenciaImage(null);
+    setReferenciaImagePreview(null);
+  };
+
+  const handleReferenciaImageSelect = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      const compressedFile = await compressMultipleImages([file]);
+      setReferenciaImage(compressedFile[0]);
+      setReferenciaImagePreview(createImagePreview(compressedFile[0]));
+      toast.success('Imagen comprimida correctamente');
+    } catch (error) {
+      console.error('Error compressing image:', error);
+      toast.error('Error al comprimir la imagen');
+    }
+  };
+
+  const handleSubmitReferencia = async (e) => {
+    e.preventDefault();
+    
+    if (!referenciaFormData.nombreCliente.trim()) {
+      toast.error('El nombre del cliente es requerido');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      let result;
+      if (editingReferencia) {
+        result = await updateReferencia(
+          editingReferencia.id,
+          referenciaFormData,
+          referenciaImage
+        );
+      } else {
+        if (!referenciaImage) {
+          toast.error('La imagen es requerida');
+          setIsSubmitting(false);
+          return;
+        }
+        result = await createReferencia(referenciaFormData, referenciaImage);
+      }
+
+      if (result.success) {
+        toast.success(editingReferencia ? 'Referencia actualizada' : 'Referencia creada');
+        closeReferenciaModal();
+      } else {
+        toast.error(result.error || 'Error al guardar referencia');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Error al guardar referencia');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteReferencia = async (referenciaId) => {
+    setIsSubmitting(true);
+    try {
+      const result = await deleteReferencia(referenciaId);
+      if (result.success) {
+        toast.success('Referencia eliminada');
+        setDeleteReferenciaConfirm(null);
+      } else {
+        toast.error(result.error || 'Error al eliminar referencia');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Error al eliminar referencia');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#FAFAF8] via-[#F5F0E8] to-[#EDE6DB] dark:from-[#0a0a0a] dark:via-[#1a1520] dark:to-[#000000]">
       {/* Header */}
@@ -469,13 +587,42 @@ const AdminPanel = () => {
               className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-[#333333] bg-white dark:bg-[#0f0f0f] text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C9A96E] transition-all text-sm"
             />
           </div>
-          <button
-            onClick={openCreateModal}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#C9A96E] hover:bg-[#B8986A] text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98] text-sm"
-          >
-            <Plus className="w-4 h-4" />
-            Nuevo Producto
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#C9A96E] hover:bg-[#B8986A] text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98] text-sm"
+            >
+              <Plus className="w-4 h-4" />
+              Añadir
+              <ChevronDown className={`w-4 h-4 transition-transform ${isMenuOpen ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {/* Menú desplegable */}
+            {isMenuOpen && (
+              <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#1a1520] rounded-xl shadow-xl border border-gray-200 dark:border-[#2d1f3f] overflow-hidden z-50">
+                <button
+                  onClick={() => {
+                    openCreateModal();
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-[#2d1f3f] transition-colors flex items-center gap-3 text-gray-700 dark:text-white"
+                >
+                  <ImageIcon className="w-4 h-4 text-[#C9A96E]" />
+                  <span className="text-sm font-medium">Añadir Producto</span>
+                </button>
+                <button
+                  onClick={() => {
+                    openReferenciaModal();
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-[#2d1f3f] transition-colors flex items-center gap-3 text-gray-700 dark:text-white border-t border-gray-100 dark:border-[#2d1f3f]"
+                >
+                  <Star className="w-4 h-4 text-[#C9A96E]" />
+                  <span className="text-sm font-medium">Añadir Referencia</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Products Grid */}
@@ -551,6 +698,92 @@ const AdminPanel = () => {
             ))}
           </div>
         )}
+
+        {/* Referencias Section */}
+        <div className="mt-12">
+          <h2 className="text-2xl font-light text-gray-800 dark:text-white mb-6 flex items-center gap-2">
+            <Star className="w-6 h-6 text-[#C9A96E]" />
+            Referencias de Clientes
+          </h2>
+          
+          {loadingReferencias ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="w-8 h-8 border-4 border-[#C9A96E] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : referencias.length === 0 ? (
+            <div className="text-center py-12 bg-white dark:bg-[#2d2640] rounded-xl">
+              <Star className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+              <p className="text-gray-500 dark:text-white/60">
+                No hay referencias. ¡Agrega la primera!
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {referencias.map((referencia, index) => (
+                <div
+                  key={referencia.id}
+                  className="group bg-white dark:bg-[#2d2640] rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all"
+                  style={{ animationDelay: `${index * 30}ms` }}
+                >
+                  {/* Imagen */}
+                  <div className="h-48 overflow-hidden bg-gray-100 dark:bg-[#1a1625] relative">
+                    {referencia.imagen?.url ? (
+                      <img
+                        src={referencia.imagen.url}
+                        alt={referencia.nombreCliente}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        <Star className="w-12 h-12" />
+                      </div>
+                    )}
+
+                    {/* Botones de acción - triángulo como en productos */}
+                    <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
+                      <button
+                        onClick={() => setViewingImage(referencia.imagen)}
+                        className="w-8 h-8 bg-white dark:bg-[#1a1a1a] rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform"
+                        title="Ver imagen"
+                      >
+                        <Eye className="w-3.5 h-3.5 text-gray-600 dark:text-[#d1d1d1]" />
+                      </button>
+                      <button
+                        onClick={() => openEditReferenciaModal(referencia)}
+                        className="w-8 h-8 bg-white dark:bg-[#1a1a1a] rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform"
+                        title="Editar"
+                      >
+                        <Edit2 className="w-3.5 h-3.5 text-gray-600 dark:text-[#d1d1d1]" />
+                      </button>
+                      <button
+                        onClick={() => setDeleteReferenciaConfirm(referencia)}
+                        className="w-8 h-8 bg-white dark:bg-[#2d2640] rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform"
+                        title="Eliminar"
+                      >
+                        <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Info */}
+                  <div className="p-4 space-y-2">
+                    <div className="flex gap-1 mb-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-3 h-3 text-[#C9A96E] fill-[#C9A96E]" />
+                      ))}
+                    </div>
+                    <h3 className="font-medium text-sm text-gray-800 dark:text-white">
+                      {referencia.nombreCliente}
+                    </h3>
+                    <p className="text-xs text-gray-600 dark:text-[#c4b5d4] line-clamp-2">
+                      {referencia.comentario}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </main>
 
       {/* Footer - Always at bottom */}
@@ -1104,6 +1337,178 @@ const AdminPanel = () => {
               >
                 <Check className="w-4 h-4" />
                 Guardar Ajuste
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Crear/Editar Referencia */}
+      {isReferenciaModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm animate-fadeIn overflow-y-auto">
+          <div className="min-h-full flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-[#2d2640] w-full max-w-md rounded-2xl overflow-hidden shadow-2xl">
+              <div className="bg-white dark:bg-[#2d2640] border-b border-gray-200 dark:border-white/10 px-6 py-4 flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+                  <Star className="w-5 h-5 text-[#C9A96E]" />
+                  {editingReferencia ? 'Editar Referencia' : 'Nueva Referencia'}
+                </h2>
+                <button
+                  onClick={closeReferenciaModal}
+                  className="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-[#1a1625] flex items-center justify-center transition-all"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmitReferencia} className="p-6 space-y-5">
+                {/* Nombre del Cliente */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
+                    Nombre del Cliente *
+                  </label>
+                  <input
+                    type="text"
+                    value={referenciaFormData.nombreCliente}
+                    onChange={(e) => setReferenciaFormData({...referenciaFormData, nombreCliente: e.target.value})}
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#0f0f0f] text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#C9A96E]"
+                    placeholder="Ej: María González"
+                    required
+                  />
+                </div>
+
+                {/* Comentario */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
+                    Comentario/Testimonio
+                  </label>
+                  <textarea
+                    value={referenciaFormData.comentario}
+                    onChange={(e) => setReferenciaFormData({...referenciaFormData, comentario: e.target.value})}
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#0f0f0f] text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#C9A96E] resize-none"
+                    placeholder="Ej: Excelente calidad y atención..."
+                    rows="4"
+                  />
+                </div>
+
+                {/* Imagen */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
+                    Foto {!editingReferencia && '*'}
+                  </label>
+                  
+                  {/* Preview de imagen existente o nueva */}
+                  {(referenciaImagePreview || editingReferencia?.imagen?.url) && (
+                    <div className="mb-3 relative">
+                      <img
+                        src={referenciaImagePreview || editingReferencia.imagen.url}
+                        alt="Preview"
+                        className="w-full h-48 object-cover rounded-xl"
+                      />
+                      {referenciaImagePreview && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            revokeImagePreview(referenciaImagePreview);
+                            setReferenciaImagePreview(null);
+                            setReferenciaImage(null);
+                          }}
+                          className="absolute top-2 right-2 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+                        >
+                          <X className="w-4 h-4 text-white" />
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  <label className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 dark:border-white/20 rounded-xl hover:border-[#C9A96E] hover:bg-gray-50 dark:hover:bg-white/5 transition-all cursor-pointer">
+                    <Upload className="w-5 h-5 text-gray-400" />
+                    <span className="text-sm text-gray-600 dark:text-white">
+                      {referenciaImagePreview || editingReferencia?.imagen?.url ? 'Cambiar imagen' : 'Seleccionar imagen'}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleReferenciaImageSelect}
+                      className="hidden"
+                    />
+                  </label>
+                  <p className="text-xs text-gray-500 dark:text-white/60 mt-2">
+                    Máximo 3MB. Se convertirá a WebP automáticamente.
+                  </p>
+                </div>
+
+                {/* Botones */}
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={closeReferenciaModal}
+                    disabled={isSubmitting}
+                    className="flex-1 py-3 px-4 border border-gray-300 dark:border-white/20 text-gray-700 dark:text-white rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-all"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex-1 py-3 px-4 bg-[#C9A96E] hover:bg-[#B8986A] text-white rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Guardando...
+                      </>
+                    ) : (
+                      <>
+                        <Check className="w-4 h-4" />
+                        {editingReferencia ? 'Actualizar' : 'Crear'}
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Eliminar Referencia */}
+      {deleteReferenciaConfirm && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white dark:bg-[#2d2640] rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+            <div className="flex items-center justify-center w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full mx-auto mb-4">
+              <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-white text-center mb-2">
+              ¿Eliminar referencia?
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-white/70 text-center mb-6">
+              Esta acción no se puede deshacer. La referencia de <strong>{deleteReferenciaConfirm.nombreCliente}</strong> será eliminada permanentemente.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteReferenciaConfirm(null)}
+                disabled={isSubmitting}
+                className="flex-1 py-2.5 px-4 border border-gray-300 dark:border-white/20 text-gray-700 dark:text-white rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => handleDeleteReferencia(deleteReferenciaConfirm.id)}
+                disabled={isSubmitting}
+                className="flex-1 py-2.5 px-4 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Eliminando...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    Eliminar
+                  </>
+                )}
               </button>
             </div>
           </div>
