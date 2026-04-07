@@ -61,7 +61,7 @@ export const compressAndConvertToWebP = async (file, options = {}) => {
     
     // Paso 2: Convertir a WebP sin comprimir (calidad 100%)
     const defaultOptions = {
-      maxSizeMB: 3,            // Límite 3MB
+      maxSizeMB: 5,            // Límite 5MB (aumentado)
       maxWidthOrHeight: 2048,  // Resolución máxima 2K
       useWebWorker: true,
       fileType: 'image/webp',
