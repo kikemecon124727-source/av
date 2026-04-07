@@ -20,7 +20,10 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # LLM Key for color detection
-EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', 'sk-emergent-347AcD1Ff287fA088A')
+EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
+if not EMERGENT_LLM_KEY:
+    logger.error("EMERGENT_LLM_KEY not found in environment variables")
+    raise ValueError("EMERGENT_LLM_KEY environment variable is required")
 
 # Create the main app
 app = FastAPI()
