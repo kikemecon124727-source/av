@@ -475,8 +475,16 @@ const Catalogo = () => {
         </>
       )}
 
-      {/* Carrusel de Referencias */}
+      {/* Carrusel de Referencias - ANTES del footer */}
       <CarruselReferencias referencias={referencias} />
+
+      {/* Footer */}
+      <footer className="bg-white/80 dark:bg-[#1a1625]/95 border-t border-gray-200 dark:border-white/5 py-6 mt-8">
+        <div className="max-w-7xl mx-auto px-4 text-center space-y-2">
+          <p className="text-gray-600 dark:text-white/60 text-sm">© 2026 jessicaalesuarez</p>
+          <p className="text-gray-500 dark:text-white/50 text-xs italic">Gracias por su preferencia ♥</p>
+        </div>
+      </footer>
 
       {/* WhatsApp Floating Button */}
       <button
