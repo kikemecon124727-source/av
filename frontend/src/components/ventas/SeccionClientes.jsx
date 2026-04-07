@@ -59,14 +59,31 @@ const SeccionClientes = ({
       return;
     }
 
-    // Calcular posición del menú
+    // Calcular posición del menú considerando scroll
     const button = event.currentTarget;
     const rect = button.getBoundingClientRect();
     
-    // Posicionar el menú justo debajo del botón, alineado a la derecha
+    // Ancho del menú
+    const menuWidth = 200;
+    
+    // Calcular posición óptima
+    let topPos = rect.bottom + 8; // Justo debajo del botón
+    let leftPos = rect.right - menuWidth; // Alineado a la derecha
+    
+    // Ajustar si se sale de la pantalla por la derecha
+    if (leftPos < 10) {
+      leftPos = 10; // Margen mínimo
+    }
+    
+    // Ajustar si se sale de la pantalla por abajo
+    const menuHeight = 200; // Altura aproximada del menú
+    if (topPos + menuHeight > window.innerHeight) {
+      topPos = rect.top - menuHeight - 8; // Mostrar arriba del botón
+    }
+    
     setMenuPosition({
-      top: rect.bottom + window.scrollY + 8,
-      left: rect.right - 200 // 200px es el ancho del menú
+      top: topPos,
+      left: leftPos
     });
     
     setMenuAbierto(clienteId);

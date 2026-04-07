@@ -1,5 +1,26 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X, Plus, Minus, Trash2, ShoppingCart } from 'lucide-react';
+
+/**
+ * Parser mejorado para URLs de imágenes (consistente con SeccionProductos)
+ */
+const getImageUrl = (image) => {
+  if (!image) return null;
+  
+  // Si es un objeto con propiedad url
+  if (typeof image === 'object' && image !== null) {
+    if (image.url) return image.url;
+    if (image.src) return image.src;
+    if (image.href) return image.href;
+  }
+  
+  // Si es un string directo (URL)
+  if (typeof image === 'string' && image.trim() !== '') {
+    return image;
+  }
+  
+  return null;
+};
 
 const ModalProducto = ({ 
   product, 
@@ -14,6 +35,20 @@ const ModalProducto = ({
   precioEspecialCliente,
   isParaCliente = false
 }) => {
+  // Cerrar con tecla ESC
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    
+    if (product) {
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
+    }
+  }, [product, onClose]);
+
   if (!product) return null;
 
   const handleCantidadChange = (color, delta) => {
@@ -37,18 +72,28 @@ const ModalProducto = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
-      <div className="bg-white dark:bg-[#2d2640] rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+    <div 
+      className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white dark:bg-[#2d2640] rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="bg-white dark:bg-[#2d2640] border-b border-gray-200 dark:border-white/10 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
           <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
             {product.nombre}
           </h2>
           <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-[#1a1625] flex items-center justify-center transition-all"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+            className="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-[#1a1625] flex items-center justify-center transition-all z-20"
+            aria-label="Cerrar modal"
           >
-            <X className="w-5 h-5 text-gray-500" />
+            <X className="w-5 h-5 text-gray-500 dark:text-white" />
           </button>
         </div>
 
@@ -58,14 +103,22 @@ const ModalProducto = ({
           {product.imagenes && product.imagenes.length > 0 && (
             <div className="mb-6">
               <div className="grid grid-cols-3 gap-2">
-                {product.imagenes.slice(0, 3).map((img, idx) => (
-                  <img
-                    key={idx}
-                    src={img.url || img}
-                    alt={`${product.nombre} ${idx + 1}`}
-                    className="w-full h-24 object-cover rounded-lg"
-                  />
-                ))}
+                {product.imagenes.slice(0, 3).map((img, idx) => {
+                  const imageUrl = getImageUrl(img);
+                  return imageUrl ? (
+                    <img
+                      key={idx}
+                      src={imageUrl}
+                      alt={`${product.nombre} ${idx + 1}`}
+                      className="w-full h-24 object-cover rounded-lg border border-gray-200 dark:border-white/10"
+                      loading="lazy"
+                      onError={(e) => {
+                        console.warn(`Error cargando imagen ${idx + 1} para ${product.nombre}:`, imageUrl);
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  ) : null;
+                })}
               </div>
             </div>
           )}
