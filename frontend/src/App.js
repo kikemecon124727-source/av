@@ -4,8 +4,10 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-route
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "./components/ThemeToggle";
 import { ToastProvider } from "./components/Toast";
+import { CartProvider } from "./context/CartContext";
 import Catalogo from "./components/Catalogo";
 import AdminPanel from "./components/AdminPanel";
+import PanelVentas from "./components/PanelVentas";
 import Login from "./components/Login";
 
 // Hook para cambiar el título según la ruta
@@ -15,6 +17,8 @@ function useDocumentTitle() {
   useEffect(() => {
     if (location.pathname === '/admin') {
       document.title = 'Administrador | Jessica Ale Suarez';
+    } else if (location.pathname === '/ventas') {
+      document.title = 'Panel de Ventas | Jessica Ale Suarez';
     } else {
       document.title = 'Catálogo | Jessica Ale Suarez';
     }
@@ -59,6 +63,16 @@ function AppRoutes() {
         }
       />
 
+      {/* Panel de ventas - Requiere autenticación */}
+      <Route
+        path="/ventas"
+        element={
+          <ProtectedRoute>
+            <PanelVentas />
+          </ProtectedRoute>
+        }
+      />
+
       {/* Ruta de respaldo para cliente */}
       <Route path="/cliente" element={<Navigate to="/" replace />} />
       
@@ -73,9 +87,11 @@ function App() {
     <ThemeProvider>
       <ToastProvider>
         <AuthProvider>
-          <BrowserRouter>
-            <AppRoutes />
-          </BrowserRouter>
+          <CartProvider>
+            <BrowserRouter>
+              <AppRoutes />
+            </BrowserRouter>
+          </CartProvider>
         </AuthProvider>
       </ToastProvider>
     </ThemeProvider>
