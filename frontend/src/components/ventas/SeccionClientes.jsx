@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Plus, MoreVertical, Edit2, Trash2, DollarSign, ShoppingBag, Users } from 'lucide-react';
 
 const SeccionClientes = ({ 
@@ -11,6 +11,21 @@ const SeccionClientes = ({
   onEditarPrecios
 }) => {
   const [menuOpen, setMenuOpen] = useState(null);
+  const menuRef = useRef(null);
+
+  // Cerrar menú al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setMenuOpen(null);
+      }
+    };
+
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [menuOpen]);
 
   if (loading) {
     return (
@@ -52,8 +67,8 @@ const SeccionClientes = ({
             <div className="col-span-4 text-center">ACCIONES</div>
           </div>
 
-          {/* Filas */}
-          <div className="divide-y divide-gray-200 dark:divide-white/10">
+          {/* Filas - con scroll si >10 */}
+          <div className={`divide-y divide-gray-200 dark:divide-white/10 ${clientes.length > 10 ? 'max-h-96 overflow-y-auto' : ''}`}>
             {clientes.map((cliente) => (
               <div key={cliente.id} className="grid grid-cols-12 gap-4 px-4 py-4 hover:bg-gray-50 dark:hover:bg-[#1a1625] transition-colors">
                 <div className="col-span-5 font-medium text-gray-800 dark:text-white truncate">
@@ -64,7 +79,7 @@ const SeccionClientes = ({
                   {cliente.pedidosTotales || 0}
                 </div>
                 
-                <div className="col-span-4 flex justify-center relative">
+                <div className="col-span-4 flex justify-center relative" ref={menuOpen === cliente.id ? menuRef : null}>
                   <button
                     onClick={() => setMenuOpen(menuOpen === cliente.id ? null : cliente.id)}
                     className="p-2 hover:bg-gray-100 dark:hover:bg-[#2d1f3f] rounded-lg transition-colors"
@@ -72,9 +87,9 @@ const SeccionClientes = ({
                     <MoreVertical className="w-5 h-5 text-gray-600 dark:text-white" />
                   </button>
 
-                  {/* Menu desplegable */}
+                  {/* Menu desplegable - FIXED position para que no se corte */}
                   {menuOpen === cliente.id && (
-                    <div className="absolute top-full right-0 mt-1 w-48 bg-white dark:bg-[#1a1520] rounded-xl shadow-xl border border-gray-200 dark:border-[#2d1f3f] overflow-hidden z-20">
+                    <div className="fixed mt-8 w-48 bg-white dark:bg-[#1a1520] rounded-xl shadow-xl border border-gray-200 dark:border-[#2d1f3f] overflow-hidden z-50">
                       <button
                         onClick={() => {
                           onEditarCliente(cliente);

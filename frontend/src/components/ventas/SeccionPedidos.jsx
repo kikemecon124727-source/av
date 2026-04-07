@@ -33,7 +33,7 @@ const SeccionPedidos = ({
               <p className="text-gray-500 dark:text-white/60 text-sm">No hay pedidos</p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-200 dark:divide-white/10 max-h-96 overflow-y-auto">
+            <div className={`divide-y divide-gray-200 dark:divide-white/10 ${pedidosPagados.length > 10 ? 'max-h-96 overflow-y-auto' : ''}`}>
               {pedidosPagados.map((pedido) => (
                 <button
                   key={pedido.id}
@@ -79,7 +79,7 @@ const SeccionPedidos = ({
               <p className="text-gray-500 dark:text-white/60 text-sm">No hay adeudos</p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-200 dark:divide-white/10 max-h-96 overflow-y-auto">
+            <div className={`divide-y divide-gray-200 dark:divide-white/10 ${pedidosConAdeudo.length > 10 ? 'max-h-96 overflow-y-auto' : ''}`}>
               {pedidosConAdeudo.map((pedido) => (
                 <button
                   key={pedido.id}

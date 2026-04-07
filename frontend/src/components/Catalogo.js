@@ -344,18 +344,6 @@ const Catalogo = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-white dark:bg-[#000000] border-t border-gray-100 dark:border-[#2a2a2a] py-10 sm:py-12">
-        <div className="max-w-7xl mx-auto px-4 text-center space-y-3">
-          <p className="text-gray-600 dark:text-[#888888] text-xs sm:text-sm tracking-wider uppercase">
-            © 2026 JESSICAALESUAREZ
-          </p>
-          <p className="text-gray-400 dark:text-[#666666] text-[10px] sm:text-xs italic">
-            Gracias por su preferencia ♥
-          </p>
-        </div>
-      </footer>
-
       {/* Product Drawer - Deslizante desde la derecha (Desktop) y Pantalla completa (Mobile) */}
       {selectedProduct && (
         <>
