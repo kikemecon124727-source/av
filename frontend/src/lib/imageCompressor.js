@@ -1,39 +1,91 @@
 import imageCompression from 'browser-image-compression';
 
 /**
- * Convierte una imagen a formato WebP con compresión optimizada
+ * Recorta una imagen a formato cuadrado (1:1)
  * @param {File} file - Archivo de imagen original
- * @param {Object} options - Opciones de compresión
- * @returns {Promise<File>} - Archivo WebP comprimido
+ * @returns {Promise<File>} - Archivo recortado
+ */
+const cropToSquare = async (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Determinar el tamaño del cuadrado (lado más pequeño)
+        const size = Math.min(img.width, img.height);
+        canvas.width = size;
+        canvas.height = size;
+        
+        // Calcular offset para centrar el recorte
+        const offsetX = (img.width - size) / 2;
+        const offsetY = (img.height - size) / 2;
+        
+        // Dibujar imagen recortada y centrada
+        ctx.drawImage(img, offsetX, offsetY, size, size, 0, 0, size, size);
+        
+        // Convertir canvas a blob
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const croppedFile = new File([blob], file.name, {
+              type: file.type,
+              lastModified: Date.now(),
+            });
+            resolve(croppedFile);
+          } else {
+            reject(new Error('Error al crear blob'));
+          }
+        }, file.type, 1.0); // Calidad 100%
+      };
+      img.onerror = () => reject(new Error('Error al cargar imagen'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('Error al leer archivo'));
+    reader.readAsDataURL(file);
+  });
+};
+
+/**
+ * Convierte una imagen a formato WebP SIN comprimir (calidad máxima) y en formato cuadrado
+ * @param {File} file - Archivo de imagen original
+ * @param {Object} options - Opciones de conversión
+ * @returns {Promise<File>} - Archivo WebP cuadrado
  */
 export const compressAndConvertToWebP = async (file, options = {}) => {
-  const defaultOptions = {
-    maxSizeMB: 3,            // 3MB por imagen
-    maxWidthOrHeight: 2048,  // Resolución 2K
-    useWebWorker: true,
-    fileType: 'image/webp',
-    initialQuality: 0.95,    // 95% de calidad - casi sin pérdida
-    alwaysKeepResolution: false,
-  };
-
-  const compressionOptions = { ...defaultOptions, ...options };
-
   try {
-    // Comprimir la imagen
-    const compressedFile = await imageCompression(file, compressionOptions);
+    // Paso 1: Recortar a cuadrado
+    console.log('Recortando imagen a formato cuadrado...');
+    const squareFile = await cropToSquare(file);
     
-    // Crear un nuevo archivo con extensión .webp
+    // Paso 2: Convertir a WebP sin comprimir (calidad 100%)
+    const defaultOptions = {
+      maxSizeMB: 3,            // Límite 3MB
+      maxWidthOrHeight: 2048,  // Resolución máxima 2K
+      useWebWorker: true,
+      fileType: 'image/webp',
+      initialQuality: 1.0,     // 100% de calidad - SIN pérdida
+      alwaysKeepResolution: true, // Mantener resolución original
+    };
+
+    const conversionOptions = { ...defaultOptions, ...options };
+    
+    // Convertir a WebP
+    const webpFile = await imageCompression(squareFile, conversionOptions);
+    
+    // Crear nuevo archivo con extensión .webp
     const webpFileName = file.name.replace(/\.[^/.]+$/, '.webp');
-    const webpFile = new File([compressedFile], webpFileName, {
+    const finalFile = new File([webpFile], webpFileName, {
       type: 'image/webp',
       lastModified: Date.now(),
     });
 
-    console.log(`Imagen comprimida: ${(file.size / 1024).toFixed(2)}KB -> ${(webpFile.size / 1024).toFixed(2)}KB`);
+    console.log(`✅ Imagen procesada: ${(file.size / 1024).toFixed(2)}KB -> ${(finalFile.size / 1024).toFixed(2)}KB (cuadrada, WebP 100%)`);
     
-    return webpFile;
+    return finalFile;
   } catch (error) {
-    console.error('Error al comprimir imagen:', error);
+    console.error('Error al procesar imagen:', error);
     throw error;
   }
 };

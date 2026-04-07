@@ -739,15 +739,8 @@ const AdminPanel = () => {
                       </div>
                     )}
 
-                    {/* Botones de acción - triángulo como en productos */}
+                    {/* Botones de acción - solo Editar y Eliminar */}
                     <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
-                      <button
-                        onClick={() => setViewingImage(referencia.imagen)}
-                        className="w-8 h-8 bg-white dark:bg-[#1a1a1a] rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform"
-                        title="Ver imagen"
-                      >
-                        <Eye className="w-3.5 h-3.5 text-gray-600 dark:text-[#d1d1d1]" />
-                      </button>
                       <button
                         onClick={() => openEditReferenciaModal(referencia)}
                         className="w-8 h-8 bg-white dark:bg-[#1a1a1a] rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform"
@@ -767,11 +760,6 @@ const AdminPanel = () => {
 
                   {/* Info */}
                   <div className="p-4 space-y-2">
-                    <div className="flex gap-1 mb-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-3 h-3 text-[#C9A96E] fill-[#C9A96E]" />
-                      ))}
-                    </div>
                     <h3 className="font-medium text-sm text-gray-800 dark:text-white">
                       {referencia.nombreCliente}
                     </h3>
