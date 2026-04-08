@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Minus, Trash2, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, Plus, Minus, Trash2, ShoppingCart, ChevronLeft, ChevronRight, User } from 'lucide-react';
 
 const ModalProducto = ({ product, isOpen, onClose, onAddToCart }) => {
+  const [clientName, setClientName] = useState('');
   const [selectedColors, setSelectedColors] = useState({});
   const [price, setPrice] = useState('');
-  const [priceType, setPriceType] = useState('fijo'); // 'fijo', 'mayoreo', 'caja'
+  const [priceType, setPriceType] = useState(null); // null = ninguno seleccionado
+  const [amountPaid, setAmountPaid] = useState('');
+  const [isFullPayment, setIsFullPayment] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showNameAlert, setShowNameAlert] = useState(false);
 
   // Reset cuando se abre el modal
   useEffect(() => {
