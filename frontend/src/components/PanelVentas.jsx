@@ -1,15 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useProducts } from '../hooks/useProducts';
 import { ThemeToggle } from './ThemeToggle';
 import { LogOut, ShoppingCart, Package } from 'lucide-react';
+import ModalProducto from './ventas/ModalProducto';
 
 const PanelVentas = () => {
   const { logout, user } = useAuth();
   const { products, loading } = useProducts();
+  
+  // Estados del modal
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [cart, setCart] = useState([]);
 
   const handleLogout = async () => {
     await logout();
+  };
+
+  // Abrir modal de producto
+  const handleProductClick = (product) => {
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+  };
+
+  // Cerrar modal
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedProduct(null);
+  };
+
+  // Agregar al carrito
+  const handleAddToCart = (cartItem) => {
+    setCart(prev => [...prev, cartItem]);
+    console.log('Producto agregado al carrito:', cartItem);
+    // Por ahora solo lo guardamos en estado
   };
 
   /**
@@ -50,9 +75,11 @@ const PanelVentas = () => {
             <div className="flex items-center gap-2 sm:gap-4">
               <button className="relative p-2 hover:bg-gray-100 dark:hover:bg-[#2d1f3f] rounded-lg transition-colors">
                 <ShoppingCart className="w-5 h-5 text-gray-600 dark:text-white" />
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#C9A96E] text-white text-xs rounded-full flex items-center justify-center">
-                  0
-                </span>
+                {cart.length > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#C9A96E] text-white text-xs rounded-full flex items-center justify-center">
+                    {cart.length}
+                  </span>
+                )}
               </button>
 
               <span className="text-xs text-gray-500 dark:text-[#9d8fb3] hidden md:inline truncate max-w-[150px]">
@@ -109,6 +136,7 @@ const PanelVentas = () => {
                 return (
                   <div
                     key={product.id}
+                    onClick={() => handleProductClick(product)}
                     className="group bg-white dark:bg-[#1a1625] rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all border border-gray-100 dark:border-white/5 hover:border-[#C9A96E] dark:hover:border-[#C9A96E] cursor-pointer"
                   >
                     {/* Imagen */}
@@ -164,6 +192,14 @@ const PanelVentas = () => {
           )}
         </div>
       </main>
+
+      {/* MODAL DE PRODUCTO */}
+      <ModalProducto 
+        product={selectedProduct}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onAddToCart={handleAddToCart}
+      />
     </div>
   );
 };
